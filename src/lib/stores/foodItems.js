@@ -62,8 +62,8 @@ function getFoodIcon(name) {
     return '<path d="M-120,-50 C-100,100 100,100 120,-50 Z" fill="#e2b280" stroke="#663300" stroke-width="5"/><path d="M-80,-30 L-80,30 M-40,-30 L-40,30 M0,-30 L0,30 M40,-30 L40,30 M80,-30 L80,30" stroke="#c55a11" stroke-width="8"/>';
   } else if (lowerName.includes('lasagna')) {
     return '<rect x="-120" y="-80" width="240" height="160" rx="5" ry="5" fill="#9c3d25" stroke="#ffffff" stroke-width="5"/><path d="M-120,-40 L120,-40 M-120,0 L120,0 M-120,40 L120,40" stroke="#ffffff" stroke-width="5"/><circle cx="-50" cy="-60" r="10" fill="#ffcc00"/><circle cx="50" cy="-20" r="10" fill="#ffcc00"/><circle cx="0" cy="20" r="10" fill="#ffcc00"/>';
-  } else if (lowerName.includes('sushi roll')) {
-    return '<rect x="-120" y="-40" width="240" height="80" rx="40" ry="40" fill="#222222" stroke="#4caf50" stroke-width="5"/><rect x="-110" y="-30" width="220" height="60" rx="30" ry="30" fill="#ffffff"/><rect x="-90" y="-20" width="180" height="40" rx="20" ry="20" fill="#ff9966"/><line x1="-120" y1="0" x2="120" y2="0" stroke="#4caf50" stroke-width="2"/>';
+  } else if (lowerName.includes('cheesecake')) {
+    return '<rect x="-120" y="-80" width="240" height="160" rx="10" ry="10" fill="#f9ecc5" stroke="#c4a146" stroke-width="5"/><rect x="-120" y="-80" width="240" height="40" fill="#c4a146" stroke="#c4a146" stroke-width="5"/><circle cx="-40" cy="0" r="10" fill="#e74c3c"/><circle cx="40" cy="0" r="10" fill="#e74c3c"/>';
   } else if (lowerName.includes('curry')) {
     return '<circle cx="0" cy="0" r="120" fill="#fff2cc" stroke="#cc6600" stroke-width="10"/><path d="M-50,-50 C-30,-20 -60,20 -50,50 M0,-50 C20,-20 -20,20 0,50 M50,-50 C70,-20 40,20 50,50" stroke="#cc6600" stroke-width="8" fill="none"/>';
   } else if (lowerName.includes('sushi')) {
@@ -78,76 +78,86 @@ function getFoodIcon(name) {
   }
 }
 
-// Completely recreated food items list with Lasagna and Sushi Roll instead of Ice Cream and Chocolate
+// Food items list with Unsplash images
 const initialFoodItems = [
   {
     id: 1,
     name: 'Pizza',
     description: 'Italian dish with a round, flattened base of leavened wheat-based dough topped with various ingredients',
-    imageUrl: createSVGImageData('Pizza', '#cc0000', '#ffedd5'),
+    imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Pizza', '#cc0000', '#ffedd5'),
     rating: 1200
   },
   {
     id: 2,
     name: 'Sushi',
     description: 'Japanese dish of prepared vinegared rice accompanied by a variety of ingredients such as seafood',
-    imageUrl: createSVGImageData('Sushi', '#2a6099', '#f5f5f5'),
+    imageUrl: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Sushi', '#2a6099', '#f5f5f5'),
     rating: 1200
   },
   {
     id: 3,
     name: 'Burger',
     description: 'Sandwich consisting of fillings—usually a patty of ground meat placed inside a sliced bun',
-    imageUrl: createSVGImageData('Burger', '#663300', '#fff9e6'),
+    imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Burger', '#663300', '#fff9e6'),
     rating: 1200
   },
   {
     id: 4,
     name: 'Pasta',
     description: 'Italian food made from a dough of flour, water, and eggs, formed into various shapes',
-    imageUrl: createSVGImageData('Pasta', '#cc6600', '#fff5e6'),
+    imageUrl: 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Pasta', '#cc6600', '#fff5e6'),
     rating: 1200
   },
   {
     id: 5,
     name: 'Tacos',
     description: 'Traditional Mexican dish consisting of a corn or wheat tortilla folded or rolled around a filling',
-    imageUrl: createSVGImageData('Tacos', '#993300', '#ffe6cc'),
+    imageUrl: 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Tacos', '#993300', '#ffe6cc'),
     rating: 1200
   },
   {
     id: 6,
     name: 'Lasagna',
     description: 'Italian dish consisting of stacked layers of pasta with sauce, cheese, and various fillings',
-    imageUrl: createSVGImageData('Lasagna', '#ffffff', '#9c3d25'),
+    imageUrl: 'https://images.unsplash.com/photo-1619895092538-128341789043?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Lasagna', '#ffffff', '#9c3d25'),
     rating: 1200
   },
   {
     id: 7,
-    name: 'Sushi Roll',
-    description: 'Japanese dish with vinegared rice and various fillings wrapped in seaweed',
-    imageUrl: createSVGImageData('Sushi Roll', '#4caf50', '#222222'),
+    name: 'Cheesecake',
+    description: 'Sweet dessert consisting of a thick, creamy filling over a crust made of crushed cookies or graham crackers',
+    imageUrl: 'https://images.unsplash.com/photo-1567171466295-4afa63d45416?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Cheesecake', '#c4a146', '#f9ecc5'),
     rating: 1200
   },
   {
     id: 8,
     name: 'Curry',
     description: 'A dish with a sauce seasoned with spices, originally from the Indian subcontinent',
-    imageUrl: createSVGImageData('Curry', '#cc6600', '#fff2cc'),
+    imageUrl: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Curry', '#cc6600', '#fff2cc'),
     rating: 1200
   },
   {
     id: 9,
     name: 'Ramen',
     description: 'Japanese noodle soup dish with wheat noodles served in a meat or fish-based broth',
-    imageUrl: createSVGImageData('Ramen', '#8c6d46', '#f9f2ec'),
+    imageUrl: 'https://images.unsplash.com/photo-1557872943-16a5ac26437e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Ramen', '#8c6d46', '#f9f2ec'),
     rating: 1200
   },
   {
     id: 10,
     name: 'Steak',
     description: 'A slice of meat, typically beef, cut from the fleshy part of an animal or large fish',
-    imageUrl: createSVGImageData('Steak', '#990000', '#ffe6e6'),
+    imageUrl: 'https://images.unsplash.com/photo-1546964124-0cce460f38ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    fallbackImageUrl: createSVGImageData('Steak', '#990000', '#ffe6e6'),
     rating: 1200
   }
 ];

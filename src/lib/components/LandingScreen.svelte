@@ -118,6 +118,12 @@
           <img 
             src={food.imageUrl} 
             alt={food.name}
+            on:error={(e) => {
+              // Use fallback image if the main image fails to load
+              if (food.fallbackImageUrl) {
+                e.target.src = food.fallbackImageUrl;
+              }
+            }}
           />
           <h3>{food.name}</h3>
         </div>
