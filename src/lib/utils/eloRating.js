@@ -36,9 +36,26 @@ export function updateRatings(ratingA, ratingB, actualOutcomeA, kFactor = 32) {
  * @param {Array} comparisonHistory - Array of previous comparisons
  * @returns {Array} - Array containing two items for comparison
  */
-export function selectComparisonPair(items, comparisonHistory) {
+export function selectComparisonPair(items, comparisonHistory = []) {
+  // Validate inputs
+  if (!Array.isArray(items)) {
+    console.error("Items must be an array");
+    return [null, null];
+  }
+  
+  if (items.length < 2) {
+    console.error("Need at least 2 items to compare");
+    return [null, null];
+  }
+  
+  if (!Array.isArray(comparisonHistory)) {
+    console.warn("Comparison history must be an array, using empty array");
+    comparisonHistory = [];
+  }
+  
   // If no comparisons have been made yet, select two random items
   if (comparisonHistory.length === 0) {
+    console.log("No comparison history, selecting random pair");
     const randomIndices = getRandomIndices(items.length, 2);
     return [items[randomIndices[0]], items[randomIndices[1]]];
   }
@@ -53,13 +70,20 @@ export function selectComparisonPair(items, comparisonHistory) {
     const itemA = sortedItems[i];
     const itemB = sortedItems[i + 1];
     
+    if (!itemA || !itemB || !itemA.id || !itemB.id) {
+      continue; // Skip invalid items
+    }
+    
     // Check if this pair has been compared recently
     const hasBeenComparedRecently = comparisonHistory
       .slice(-Math.min(5, comparisonHistory.length))
-      .some(comp => 
-        (comp.itemA.id === itemA.id && comp.itemB.id === itemB.id) || 
-        (comp.itemA.id === itemB.id && comp.itemB.id === itemA.id)
-      );
+      .some(comp => {
+        // Validate comparison object
+        if (!comp || !comp.itemA || !comp.itemB) return false;
+        
+        return (comp.itemA.id === itemA.id && comp.itemB.id === itemB.id) || 
+               (comp.itemA.id === itemB.id && comp.itemB.id === itemA.id);
+      });
     
     if (!hasBeenComparedRecently) {
       potentialPairs.push([itemA, itemB]);
@@ -68,6 +92,7 @@ export function selectComparisonPair(items, comparisonHistory) {
   
   // If no suitable pairs found, select a random pair
   if (potentialPairs.length === 0) {
+    console.log("No potential pairs found, selecting random pair");
     const randomIndices = getRandomIndices(items.length, 2);
     return [items[randomIndices[0]], items[randomIndices[1]]];
   }
@@ -84,14 +109,35 @@ export function selectComparisonPair(items, comparisonHistory) {
  * @returns {Array} - Array of random indices
  */
 function getRandomIndices(max, count) {
-  const indices = [];
-  while (indices.length < count) {
-    const randomIndex = Math.floor(Math.random() * max);
-    if (!indices.includes(randomIndex)) {
-      indices.push(randomIndex);
-    }
+  // Validate inputs
+  if (typeof max !== 'number' || max <= 0) {
+    console.error(`Invalid max value: ${max}`);
+    return [0, 0];
   }
-  return indices;
+  
+  if (typeof count !== 'number' || count <= 0) {
+    console.error(`Invalid count value: ${count}`);
+    return [0, 0];
+  }
+  
+  // Safety check to prevent infinite loops
+  if (count > max) {
+    console.warn(`Requested ${count} unique indices but max is only ${max}, limiting to max`);
+    count = max;
+  }
+  
+  // Use a different algorithm to avoid potential infinite loops
+  // First create an array of all possible indices
+  const allIndices = Array.from({ length: max }, (_, i) => i);
+  
+  // Then shuffle it using Fisher-Yates algorithm
+  for (let i = allIndices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allIndices[i], allIndices[j]] = [allIndices[j], allIndices[i]];
+  }
+  
+  // Return the first 'count' indices
+  return allIndices.slice(0, count);
 }
 
 /**

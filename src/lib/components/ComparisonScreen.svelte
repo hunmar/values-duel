@@ -17,13 +17,26 @@
   
   // Subscribe to stores
   onMount(() => {
-    const unsubscribeFoodItems = foodItems.subscribe(items => {
-      foodList = items;
-      selectNextPair();
-    });
-    
+    // First subscribe to app state so we have access to comparison history
     const unsubscribeAppState = appState.subscribe(state => {
       currentState = state;
+      
+      // If we have a valid state but no food items loaded yet, wait for food items to load
+      if (currentState && !itemA && !itemB && foodList && foodList.length >= 2) {
+        console.log("Selecting initial pair from appState update");
+        selectNextPair();
+      }
+    });
+    
+    // Then subscribe to food items
+    const unsubscribeFoodItems = foodItems.subscribe(items => {
+      foodList = items;
+      
+      // If we already have the app state and valid food list but no items selected yet, select them
+      if (currentState && !itemA && !itemB && foodList && foodList.length >= 2) {
+        console.log("Selecting initial pair from foodItems update");
+        selectNextPair();
+      }
     });
     
     // Cleanup subscriptions on component unmount
@@ -35,14 +48,38 @@
   });
   
   function selectNextPair() {
-    if (!foodList || foodList.length < 2) return;
+    if (!foodList || foodList.length < 2) {
+      console.error("Not enough food items to select a pair");
+      return;
+    }
+    
+    if (!currentState || !Array.isArray(currentState.comparisonHistory)) {
+      console.error("Invalid app state or comparison history");
+      // Use empty array as fallback if comparison history is not available
+      currentState = currentState || {};
+      currentState.comparisonHistory = [];
+    }
+    
+    console.log(`Selecting pair from ${foodList.length} items with ${currentState.comparisonHistory.length} history items`);
     
     // Select a pair for comparison
-    const [nextItemA, nextItemB] = selectComparisonPair(foodList, currentState.comparisonHistory);
-    itemA = nextItemA;
-    itemB = nextItemB;
-    selectedItem = null;
-    selectionMade = false;
+    try {
+      const [nextItemA, nextItemB] = selectComparisonPair(foodList, currentState.comparisonHistory);
+      
+      if (!nextItemA || !nextItemB) {
+        console.error("Failed to select valid food items");
+        return;
+      }
+      
+      itemA = nextItemA;
+      itemB = nextItemB;
+      selectedItem = null;
+      selectionMade = false;
+      
+      console.log(`Selected items: ${itemA.name} vs ${itemB.name}`);
+    } catch (error) {
+      console.error("Error selecting food pair:", error);
+    }
   }
   
   function handleSelection(item) {
