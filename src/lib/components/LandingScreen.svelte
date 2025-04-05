@@ -21,7 +21,14 @@
   
   function startRanking() {
     // Calculate the minimum number of comparisons needed
+    // Make sure we have at least 2 food items to compare
+    if (!foodList || foodList.length < 2) {
+      alert("Not enough food items to compare. Please add more items.");
+      return;
+    }
+    
     const minComparisons = calculateMinComparisons(foodList.length);
+    console.log(`Starting comparison with ${foodList.length} items and ${minComparisons} comparisons`);
     
     // Update the app state
     appState.update(state => ({

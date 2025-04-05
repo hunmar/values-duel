@@ -60,9 +60,9 @@ const initialFoodItems = [
   },
   {
     id: 9,
-    name: 'Sushi',
-    description: 'Japanese dish of prepared vinegared rice accompanied by a variety of ingredients such as seafood',
-    imageUrl: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    name: 'Ramen',
+    description: 'Japanese noodle soup dish with wheat noodles served in a meat or fish-based broth',
+    imageUrl: 'https://images.unsplash.com/photo-1557872943-16a5ac26437e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
     rating: 1200
   },
   {

@@ -2,12 +2,14 @@
   export let current = 0;
   export let total = 100;
   
-  $: percentage = Math.min(100, Math.max(0, (current / total) * 100));
+  $: validCurrent = typeof current === 'number' ? current : 0;
+  $: validTotal = typeof total === 'number' && total > 0 ? total : 100;
+  $: percentage = Math.min(100, Math.max(0, (validCurrent / validTotal) * 100));
 </script>
 
 <div class="progress-container">
   <div class="progress-info">
-    <span>Progress: {current} of {total} comparisons</span>
+    <span>Progress: {validCurrent} of {validTotal} comparisons</span>
     <span>{Math.round(percentage)}%</span>
   </div>
   <div class="progress-bar">

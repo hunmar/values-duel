@@ -179,7 +179,11 @@
   </div>
   
   <div class="comparison-info">
-    <p>Comparison {currentState.completedComparisons + 1} of {currentState.totalComparisons}</p>
+    {#if typeof currentState.completedComparisons === 'number' && typeof currentState.totalComparisons === 'number'}
+      <p>Comparison {currentState.completedComparisons + 1} of {currentState.totalComparisons}</p>
+    {:else}
+      <p>Loading comparison...</p>
+    {/if}
   </div>
 </div>
 

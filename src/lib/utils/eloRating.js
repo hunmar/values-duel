@@ -100,6 +100,10 @@ function getRandomIndices(max, count) {
  * @returns {number} - Minimum number of comparisons needed
  */
 export function calculateMinComparisons(itemCount) {
+  // Ensure we have a valid number and at least 1 comparison
+  if (!itemCount || typeof itemCount !== 'number' || itemCount < 2) {
+    return 1;
+  }
   return Math.ceil(Math.log2(itemCount) * itemCount);
 }
 
