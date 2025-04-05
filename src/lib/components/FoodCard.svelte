@@ -21,8 +21,8 @@
       src={food.imageUrl} 
       alt={food.name} 
       on:error={(e) => {
-        // Replace broken image with a placeholder
-        e.target.src = 'https://via.placeholder.com/320x220?text=No+Image';
+        // Use fallback URL if available, otherwise use a generic placeholder
+        e.target.src = food.fallbackUrl || `https://via.placeholder.com/500x400/f0f0f0/333333?text=${encodeURIComponent(food.name)}`;
       }}
     />
   </div>
