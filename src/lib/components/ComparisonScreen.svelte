@@ -59,6 +59,18 @@
     const actualOutcomeA = winningItem.id === itemA.id ? 1 : 0;
     const { newRatingA, newRatingB } = updateRatings(itemA.rating, itemB.rating, actualOutcomeA);
     
+    // Add animation class to show selection feedback
+    document.querySelector('.comparison-cards').classList.add('choice-made');
+    
+    // Play a subtle animation on the selected card
+    const selectedCardElement = winningItem.id === itemA.id 
+      ? document.querySelector('.comparison-cards .food-card:first-child')
+      : document.querySelector('.comparison-cards .food-card:last-child');
+    
+    if (selectedCardElement) {
+      selectedCardElement.classList.add('winner-selected');
+    }
+    
     // Update food items in the store with new ratings
     foodItems.update(items => {
       return items.map(item => {
@@ -91,17 +103,35 @@
         ? APP_STATES.RESULTS
         : APP_STATES.COMPARISON;
       
-      // Wait a moment before moving to the next comparison or results
+      // Wait a moment before moving to the next comparison or results (longer delay for better animation)
       timerId = setTimeout(() => {
+        // Reset animation classes
+        document.querySelector('.comparison-cards')?.classList.remove('choice-made');
+        document.querySelector('.winner-selected')?.classList.remove('winner-selected');
+        
         if (nextState === APP_STATES.COMPARISON) {
-          selectNextPair();
+          // Add transition-out class for smooth transition between pairs
+          document.querySelector('.comparison-cards')?.classList.add('transition-out');
+          
+          // Short timeout to allow the transition-out animation to complete
+          setTimeout(() => {
+            selectNextPair();
+            // Remove the transition-out class after new pair is selected
+            document.querySelector('.comparison-cards')?.classList.remove('transition-out');
+            document.querySelector('.comparison-cards')?.classList.add('transition-in');
+            
+            // Remove the transition-in class after animation completes
+            setTimeout(() => {
+              document.querySelector('.comparison-cards')?.classList.remove('transition-in');
+            }, 500);
+          }, 300);
         }
         
         appState.update(s => ({
           ...s,
           currentState: nextState
         }));
-      }, 1000);
+      }, 1500); // Increased delay for better animation visibility
       
       return {
         ...state,
@@ -196,5 +226,29 @@
     .vs-indicator {
       margin: 1rem 0;
     }
+  }
+  
+  /* Animation styles */
+  .comparison-cards.choice-made .food-card:not(.winner-selected) {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  
+  .food-card.winner-selected {
+    transform: scale(1.05) translateY(-10px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+  }
+  
+  .comparison-cards.transition-out {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  .comparison-cards.transition-in {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
   }
 </style>

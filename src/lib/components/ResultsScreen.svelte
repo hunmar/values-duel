@@ -7,19 +7,32 @@
   import { STORAGE_KEYS, saveToLocalStorage, clearAllAppData } from '../utils/localStorage.js';
   
   let rankedFoodItems = [];
+  let shareUrl = null;
+  let copySuccess = false;
+  let isSharedResult = false;
   
   onMount(() => {
+    // Subscribe to the app state store to check if this is a shared result
+    const unsubscribeAppState = appState.subscribe(state => {
+      isSharedResult = state.isSharedResult || false;
+    });
+    
     // Subscribe to the foodItems store
-    const unsubscribe = foodItems.subscribe(items => {
+    const unsubscribeFoodItems = foodItems.subscribe(items => {
       // Sort items by rating
       rankedFoodItems = sortItemsByRating(items);
       
-      // Save the final rankings to localStorage
-      saveToLocalStorage(STORAGE_KEYS.FOOD_ITEMS, items);
+      // Save the final rankings to localStorage only if not a shared result
+      if (!isSharedResult) {
+        saveToLocalStorage(STORAGE_KEYS.FOOD_ITEMS, items);
+      }
     });
     
-    // Cleanup subscription on component unmount
-    return unsubscribe;
+    // Cleanup subscriptions on component unmount
+    return () => {
+      unsubscribeFoodItems();
+      unsubscribeAppState();
+    };
   });
   
   function restartRanking() {
@@ -42,6 +55,10 @@
     
     // Clear stored data
     clearAllAppData();
+    
+    // Reset share URL
+    shareUrl = null;
+    copySuccess = false;
   }
   
   function exportRankings() {
@@ -63,17 +80,67 @@
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   }
+  
+  function generateShareableLink() {
+    // Create a shareable data structure with just the essential information
+    const shareableData = rankedFoodItems.map(item => ({
+      name: item.name,
+      rating: item.rating,
+      position: rankedFoodItems.findIndex(i => i.id === item.id) + 1
+    }));
+    
+    // Compress the data by encoding it as a JSON string and then as a URL-safe base64 string
+    const jsonStr = JSON.stringify(shareableData);
+    const base64Str = btoa(unescape(encodeURIComponent(jsonStr)));
+    
+    // Create a shareable URL with the data as a query parameter
+    const baseUrl = window.location.origin + window.location.pathname;
+    shareUrl = `${baseUrl}?results=${base64Str}`;
+    
+    // Reset copy success state
+    copySuccess = false;
+  }
+  
+  function copyShareUrl() {
+    // Get the input element
+    const shareInput = document.getElementById('share-url-input');
+    
+    // Select the text
+    shareInput.select();
+    shareInput.setSelectionRange(0, 99999); // For mobile devices
+    
+    // Copy the text to the clipboard
+    document.execCommand('copy');
+    
+    // Update the copy success state
+    copySuccess = true;
+    
+    // Reset the copy success state after 2 seconds
+    setTimeout(() => {
+      copySuccess = false;
+    }, 2000);
+  }
 </script>
 
 <div class="results-container">
   <header>
-    <h1>Your Food Preference Ranking</h1>
-    <p>Based on your comparisons, here's how you ranked these foods</p>
+    {#if isSharedResult}
+      <h1>Shared Food Preference Ranking</h1>
+      <p>Someone shared their food preferences with you</p>
+    {:else}
+      <h1>Your Food Preference Ranking</h1>
+      <p>Based on your comparisons, here's how you ranked these foods</p>
+    {/if}
   </header>
   
   <div class="results-summary">
-    <p>You completed {rankedFoodItems.length} food item comparisons.</p>
-    <p>Your top choice was <strong>{rankedFoodItems[0]?.name}</strong>!</p>
+    {#if isSharedResult}
+      <p>This is a shared ranking of {rankedFoodItems.length} food items.</p>
+      <p>Their top choice was <strong>{rankedFoodItems[0]?.name}</strong>!</p>
+    {:else}
+      <p>You completed {rankedFoodItems.length} food item comparisons.</p>
+      <p>Your top choice was <strong>{rankedFoodItems[0]?.name}</strong>!</p>
+    {/if}
   </div>
   
   <div class="ranked-list">
@@ -97,12 +164,37 @@
   
   <div class="actions">
     <button class="action-button restart" on:click={restartRanking}>
-      Restart Ranking
+      {isSharedResult ? 'Start Your Own Ranking' : 'Restart Ranking'}
     </button>
     <button class="action-button export" on:click={exportRankings}>
       Export Results
     </button>
+    {#if !isSharedResult}
+      <button class="action-button share" on:click={generateShareableLink}>
+        Share Results
+      </button>
+    {/if}
   </div>
+  
+  {#if shareUrl}
+    <div class="share-container">
+      <p>Share your results with this link:</p>
+      <div class="share-url-container">
+        <input type="text" readonly value={shareUrl} class="share-url" id="share-url-input" />
+        <button class="copy-button" on:click={copyShareUrl}>
+          {copySuccess ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+      <div class="share-social">
+        <a href={`https://twitter.com/intent/tweet?text=Check%20out%20my%20food%20preferences!&url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" class="social-button twitter">
+          Share on Twitter
+        </a>
+        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" class="social-button facebook">
+          Share on Facebook
+        </a>
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -281,6 +373,84 @@
     transform: translateY(0);
   }
   
+  .action-button.share {
+    background-color: #9C27B0;
+    color: white;
+  }
+  
+  .action-button.share:hover {
+    background-color: #7B1FA2;
+  }
+  
+  .share-container {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .share-url-container {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+  }
+  
+  .share-url {
+    flex-grow: 1;
+    max-width: 500px;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    font-size: 0.9rem;
+  }
+  
+  .copy-button {
+    padding: 0.8rem 1.2rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .copy-button:hover {
+    background-color: #45a049;
+  }
+  
+  .share-social {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .social-button {
+    display: inline-block;
+    padding: 0.8rem 1.2rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: opacity 0.3s ease;
+  }
+  
+  .social-button:hover {
+    opacity: 0.9;
+  }
+  
+  .social-button.twitter {
+    background-color: #1DA1F2;
+    color: white;
+  }
+  
+  .social-button.facebook {
+    background-color: #4267B2;
+    color: white;
+  }
+  
   @media (max-width: 768px) {
     .ranked-item {
       flex-direction: column;
@@ -315,6 +485,31 @@
     }
     
     .action-button {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .share-url-container {
+      flex-direction: column;
+    }
+    
+    .share-url {
+      width: 100%;
+      max-width: none;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+    }
+    
+    .copy-button {
+      width: 100%;
+      border-radius: 4px;
+    }
+    
+    .share-social {
+      flex-direction: column;
+    }
+    
+    .social-button {
       width: 100%;
     }
   }
