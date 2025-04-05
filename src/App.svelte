@@ -7,7 +7,7 @@
   import { STORAGE_KEYS, loadFromLocalStorage, clearFromLocalStorage } from './lib/utils/localStorage.js';
   import LandingScreenNew from './lib/components/LandingScreenNew.svelte';
   import ComparisonScreen from './lib/components/ComparisonScreen.svelte';
-  import ResultsScreen from './lib/components/ResultsScreen.svelte';
+  import ResultsScreenNew from './lib/components/ResultsScreenNew.svelte';
   
   let currentAppState = APP_STATES.LANDING;
   let previousAppState = null;
@@ -252,7 +252,7 @@
       </div>
     {:else if currentAppState === APP_STATES.RESULTS}
       <div in:fly={getTransitionProps()} out:fade={{ duration: 200 }}>
-        <ResultsScreen />
+        <ResultsScreenNew />
       </div>
     {/if}
   </main>
