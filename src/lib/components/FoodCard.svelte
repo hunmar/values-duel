@@ -2,19 +2,29 @@
   export let food = {};
   export let onClick = () => {};
   export let selected = false;
+  export let keyboardAccessible = false;
+
+  // Handle keyboard interaction and click for better accessibility
+  function handleInteraction() {
+    if (!selected) {
+      onClick(food);
+    }
+  }
 </script>
 
 <div 
-  class="food-card {selected ? 'selected' : ''}" 
-  on:click={() => onClick(food)}
+  class="food-card {selected ? 'selected' : ''} {keyboardAccessible ? 'keyboard-accessible' : ''}" 
+  on:click={handleInteraction}
   on:keydown={(e) => {
     if (e.key === 'Enter' || e.key === ' ') {
-      onClick(food);
+      handleInteraction();
+      e.preventDefault();
     }
   }}
   tabindex="0"
   role="button"
   aria-pressed={selected}
+  aria-label="Choose {food.name}"
 >
   <div class="food-image">
     <img 
@@ -94,5 +104,29 @@
   .food-card:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+  }
+  
+  .food-card.keyboard-accessible:focus {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(66, 153, 225, 0.6);
+  }
+  
+  /* Add a visual indicator for keyboard access */
+  .food-card.keyboard-accessible:focus::after {
+    content: "";
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(66, 153, 225, 0.8);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+    100% { transform: scale(0.95); opacity: 0.7; }
   }
 </style>

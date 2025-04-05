@@ -14,9 +14,53 @@
   let selectedItem = null;
   let selectionMade = false;
   let timerId = null;
+  let leftCardEl;
+  let rightCardEl;
   
   // Subscribe to stores
+  // Handle keyboard navigation
+  function handleKeydown(event) {
+    if (selectionMade) return;
+    
+    switch (event.key) {
+      case 'ArrowLeft':
+        // Select left food item
+        if (itemA) handleSelection(itemA);
+        event.preventDefault();
+        break;
+      case 'ArrowRight':
+        // Select right food item
+        if (itemB) handleSelection(itemB);
+        event.preventDefault();
+        break;
+      case 'Tab':
+        // Focus the other card
+        if (document.activeElement === leftCardEl) {
+          rightCardEl?.focus();
+          event.preventDefault();
+        } else if (document.activeElement === rightCardEl) {
+          leftCardEl?.focus();
+          event.preventDefault();
+        }
+        break;
+      case ' ':
+      case 'Enter':
+        // Select the currently focused card
+        if (document.activeElement === leftCardEl && itemA) {
+          handleSelection(itemA);
+          event.preventDefault();
+        } else if (document.activeElement === rightCardEl && itemB) {
+          handleSelection(itemB);
+          event.preventDefault();
+        }
+        break;
+    }
+  }
+
   onMount(() => {
+    // Add keyboard event listener
+    window.addEventListener('keydown', handleKeydown);
+    
     // First subscribe to app state so we have access to comparison history
     const unsubscribeAppState = appState.subscribe(state => {
       currentState = state;
@@ -39,10 +83,16 @@
       }
     });
     
+    // Focus the left card initially for keyboard navigation
+    setTimeout(() => {
+      leftCardEl?.focus();
+    }, 100);
+    
     // Cleanup subscriptions on component unmount
     return () => {
       unsubscribeFoodItems();
       unsubscribeAppState();
+      window.removeEventListener('keydown', handleKeydown);
       if (timerId) clearTimeout(timerId);
     };
   });
@@ -199,19 +249,34 @@
     total={currentState.totalComparisons} 
   />
   
-  <div class="comparison-cards">
+  <div class="comparison-cards" role="group" aria-label="Food comparison">
     {#if itemA && itemB}
-      <FoodCard 
-        food={itemA} 
-        onClick={handleSelection} 
-        selected={selectedItem && selectedItem.id === itemA.id} 
-      />
-      <div class="vs-indicator">VS</div>
-      <FoodCard 
-        food={itemB} 
-        onClick={handleSelection} 
-        selected={selectedItem && selectedItem.id === itemB.id} 
-      />
+      <div bind:this={leftCardEl} class="card-wrapper">
+        <FoodCard 
+          food={itemA} 
+          onClick={handleSelection} 
+          selected={selectedItem && selectedItem.id === itemA.id}
+          keyboardAccessible={true}
+        />
+        <div class="keyboard-hint" aria-hidden="true">← Left Arrow</div>
+      </div>
+      
+      <div class="vs-indicator" aria-hidden="true">
+        <span>VS</span>
+        <div class="keyboard-instructions">
+          Use arrow keys to select
+        </div>
+      </div>
+      
+      <div bind:this={rightCardEl} class="card-wrapper">
+        <FoodCard 
+          food={itemB} 
+          onClick={handleSelection} 
+          selected={selectedItem && selectedItem.id === itemB.id}
+          keyboardAccessible={true}
+        />
+        <div class="keyboard-hint" aria-hidden="true">Right Arrow →</div>
+      </div>
     {/if}
   </div>
   
@@ -255,10 +320,45 @@
     margin: 2rem 0;
   }
   
+  .card-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  
+  .keyboard-hint {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #777;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .card-wrapper:focus-within .keyboard-hint {
+    opacity: 1;
+  }
+  
   .vs-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .vs-indicator span {
     font-size: 2rem;
     font-weight: bold;
     color: #999;
+  }
+  
+  .keyboard-instructions {
+    font-size: 0.85rem;
+    color: #777;
+    background-color: #f0f0f0;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    white-space: nowrap;
   }
   
   .comparison-info {

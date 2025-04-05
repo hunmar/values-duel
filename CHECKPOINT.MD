@@ -76,6 +76,28 @@
   - Improved animations for progress indication
   - Added better visual feedback for user interactions
 
+### April 9, 2025
+- Implemented comprehensive keyboard navigation (9.3)
+  - Added arrow key support for selecting food items
+  - Improved focus management and tab navigation
+  - Added visual indicators for keyboard focus
+  - Ensured keyboard accessibility throughout the app
+- Added dark mode with theme toggle (4.5)
+  - Implemented light and dark color schemes
+  - Added system theme detection
+  - Created smooth theme transitions
+  - Added theme toggle button with animation
+- Added help overlay with documentation (12.3)
+  - Created comprehensive help screen
+  - Added keyboard shortcut information
+  - Included feature documentation
+  - Made help accessible from any screen
+- Enhanced visual presentation with SVG graphics
+  - Replaced external image dependencies with inline SVGs
+  - Created custom food icons for better recognition
+  - Ensured consistent appearance across all devices
+  - Eliminated reliance on external image hosting
+
 ## Product Vision
 "Taste Duel" is a Svelte-based web application that helps users discover their true food preferences through an engaging series of direct comparisons. Using the Elo rating system (commonly used in chess rankings), the app presents users with pairs of food items and asks them to choose which they prefer. After completing all necessary comparisons, users receive a comprehensive ranked list of their food preferences, providing insights into their taste preferences that may not be immediately obvious through self-assessment.
 
