@@ -19,11 +19,7 @@
   <div class="food-image">
     <img 
       src={food.imageUrl} 
-      alt={food.name} 
-      on:error={(e) => {
-        // Use fallback URL if available, otherwise use a generic placeholder
-        e.target.src = food.fallbackUrl || `https://via.placeholder.com/500x400/f0f0f0/333333?text=${encodeURIComponent(food.name)}`;
-      }}
+      alt={food.name}
     />
   </div>
   <div class="food-info">

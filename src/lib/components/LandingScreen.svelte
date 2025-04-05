@@ -117,10 +117,7 @@
         <div class="food-item">
           <img 
             src={food.imageUrl} 
-            alt={food.name} 
-            on:error={(e) => {
-              e.target.src = food.fallbackUrl || `https://via.placeholder.com/150x100/f0f0f0/333333?text=${encodeURIComponent(food.name)}`;
-            }}
+            alt={food.name}
           />
           <h3>{food.name}</h3>
         </div>
