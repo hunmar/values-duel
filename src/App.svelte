@@ -80,7 +80,7 @@
       (previousAppState === APP_STATES.LANDING && currentAppState === APP_STATES.COMPARISON) ||
       (previousAppState === APP_STATES.COMPARISON && currentAppState === APP_STATES.RESULTS)
     ) {
-      return { x: 300, duration: 300 };
+      return { x: 300, duration: 300, opacity: 0 };
     } 
     // Moving backward in the app flow
     else if (
@@ -88,10 +88,10 @@
       (previousAppState === APP_STATES.RESULTS && currentAppState === APP_STATES.COMPARISON) ||
       (previousAppState === APP_STATES.RESULTS && currentAppState === APP_STATES.LANDING)
     ) {
-      return { x: -300, duration: 300 };
+      return { x: -300, duration: 300, opacity: 0 };
     }
     // Default/initial transition
-    return { y: 20, duration: 300 };
+    return { y: 20, duration: 300, opacity: 0 };
   }
 </script>
 

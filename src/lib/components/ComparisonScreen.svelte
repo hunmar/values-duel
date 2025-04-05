@@ -60,7 +60,10 @@
     const { newRatingA, newRatingB } = updateRatings(itemA.rating, itemB.rating, actualOutcomeA);
     
     // Add animation class to show selection feedback
-    document.querySelector('.comparison-cards').classList.add('choice-made');
+    const comparisonCards = document.querySelector('.comparison-cards');
+    if (comparisonCards) {
+      comparisonCards.classList.add('choice-made');
+    }
     
     // Play a subtle animation on the selected card
     const selectedCardElement = winningItem.id === itemA.id 
@@ -106,25 +109,31 @@
       // Wait a moment before moving to the next comparison or results (longer delay for better animation)
       timerId = setTimeout(() => {
         // Reset animation classes
-        document.querySelector('.comparison-cards')?.classList.remove('choice-made');
+        const comparisonCards = document.querySelector('.comparison-cards');
+        comparisonCards?.classList.remove('choice-made');
         document.querySelector('.winner-selected')?.classList.remove('winner-selected');
         
         if (nextState === APP_STATES.COMPARISON) {
           // Add transition-out class for smooth transition between pairs
-          document.querySelector('.comparison-cards')?.classList.add('transition-out');
+          if (comparisonCards) {
+            comparisonCards.classList.add('transition-out');
           
-          // Short timeout to allow the transition-out animation to complete
-          setTimeout(() => {
-            selectNextPair();
-            // Remove the transition-out class after new pair is selected
-            document.querySelector('.comparison-cards')?.classList.remove('transition-out');
-            document.querySelector('.comparison-cards')?.classList.add('transition-in');
-            
-            // Remove the transition-in class after animation completes
+            // Short timeout to allow the transition-out animation to complete
             setTimeout(() => {
-              document.querySelector('.comparison-cards')?.classList.remove('transition-in');
-            }, 500);
-          }, 300);
+              selectNextPair();
+              // Remove the transition-out class after new pair is selected
+              comparisonCards.classList.remove('transition-out');
+              comparisonCards.classList.add('transition-in');
+              
+              // Remove the transition-in class after animation completes
+              setTimeout(() => {
+                comparisonCards.classList.remove('transition-in');
+              }, 500);
+            }, 300);
+          } else {
+            // Fallback if element not found
+            selectNextPair();
+          }
         }
         
         appState.update(s => ({

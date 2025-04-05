@@ -155,8 +155,7 @@
     <div class="format-modal">
       <div class="format-content">
         <h3>Required JSON Format</h3>
-        <pre>
-[
+        <pre>{`[
   {
     "id": 1,
     "name": "Item Name",
@@ -165,8 +164,7 @@
     "rating": 1200
   },
   ...
-]
-        </pre>
+]`}</pre>
         <p>Each item must include id, name, description, imageUrl, and rating (start with 1200).</p>
         <button on:click={() => showFormatInfo = false}>Close</button>
       </div>
