@@ -5,7 +5,7 @@
   import appState from './lib/stores/appState.js';
   import foodItems from './lib/stores/foodItems.js';
   import { STORAGE_KEYS, loadFromLocalStorage, clearFromLocalStorage } from './lib/utils/localStorage.js';
-  import LandingScreen from './lib/components/LandingScreen.svelte';
+  import LandingScreenNew from './lib/components/LandingScreenNew.svelte';
   import ComparisonScreen from './lib/components/ComparisonScreen.svelte';
   import ResultsScreen from './lib/components/ResultsScreen.svelte';
   
@@ -49,16 +49,85 @@
         
         // Create temporary food items for displaying the shared results
         const sharedFoodItems = decodedData.map((item, index) => {
-          const imageUrl = createSVGImageData 
-            ? createSVGImageData(item.name, '#ffffff', '#333333')
-            : `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="400" viewBox="0 0 500 400"><rect width="500" height="400" fill="#333" rx="15" ry="15"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#fff">${item.name}</text></svg>`)}`;
+          // Try to find a matching image from Unsplash based on food name
+          let imageUrl;
+          let fallbackImageUrl;
+          
+          // Generate fallback SVG with appropriate colors based on food type
+          let fgColor = '#ffffff';
+          let bgColor = '#333333';
+          
+          // Set colors based on food type to match the original SVGs in foodItems.js
+          const lowerName = item.name.toLowerCase();
+          if (lowerName.includes('pizza')) {
+            fgColor = '#cc0000';
+            bgColor = '#ffedd5';
+          } else if (lowerName.includes('burger')) {
+            fgColor = '#663300';
+            bgColor = '#fff9e6';
+          } else if (lowerName.includes('pasta')) {
+            fgColor = '#cc6600';
+            bgColor = '#fff5e6';
+          } else if (lowerName.includes('tacos')) {
+            fgColor = '#993300';
+            bgColor = '#ffe6cc';
+          } else if (lowerName.includes('lasagna')) {
+            fgColor = '#ffffff';
+            bgColor = '#9c3d25';
+          } else if (lowerName.includes('cheesecake')) {
+            fgColor = '#c4a146';
+            bgColor = '#f9ecc5';
+          } else if (lowerName.includes('sushi')) {
+            fgColor = '#2a6099';
+            bgColor = '#f5f5f5';
+          } else if (lowerName.includes('curry')) {
+            fgColor = '#cc6600';
+            bgColor = '#fff2cc';
+          } else if (lowerName.includes('ramen')) {
+            fgColor = '#8c6d46';
+            bgColor = '#f9f2ec';
+          } else if (lowerName.includes('steak')) {
+            fgColor = '#990000';
+            bgColor = '#ffe6e6';
+          }
+          
+          fallbackImageUrl = createSVGImageData 
+            ? createSVGImageData(item.name, fgColor, bgColor)
+            : `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="400" viewBox="0 0 500 400"><rect width="500" height="400" fill="${bgColor}" rx="15" ry="15"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="${fgColor}">${item.name}</text></svg>`)}`;
+          
+          // Common food types with Unsplash images
+          if (item.name.toLowerCase().includes('pizza')) {
+            imageUrl = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else if (item.name.toLowerCase().includes('burger')) {
+            imageUrl = 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else if (item.name.toLowerCase().includes('cheesecake')) {
+            imageUrl = 'https://images.unsplash.com/photo-1567171466295-4afa63d45416?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else if (item.name.toLowerCase().includes('sushi')) {
+            imageUrl = 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else if (item.name.toLowerCase().includes('pasta')) {
+            imageUrl = 'https://images.unsplash.com/photo-1598866594230-a7c12756260f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else if (item.name.toLowerCase().includes('tacos')) {
+            imageUrl = 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else if (item.name.toLowerCase().includes('lasagna')) {
+            imageUrl = 'https://images.unsplash.com/photo-1619895092538-128341789043?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else if (item.name.toLowerCase().includes('curry')) {
+            imageUrl = 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else if (item.name.toLowerCase().includes('ramen')) {
+            imageUrl = 'https://images.unsplash.com/photo-1557872943-16a5ac26437e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else if (item.name.toLowerCase().includes('steak')) {
+            imageUrl = 'https://images.unsplash.com/photo-1546964124-0cce460f38ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+          } else {
+            // Default image for foods we don't have specific images for
+            imageUrl = `https://source.unsplash.com/500x400/?food,${encodeURIComponent(item.name)}`;
+          }
           
           return {
             id: index + 1,
             name: item.name,
             rating: item.rating,
             description: `Ranked #${item.position}`,
-            imageUrl
+            imageUrl,
+            fallbackImageUrl
           };
         });
         
@@ -175,7 +244,7 @@
   <main>
     {#if currentAppState === APP_STATES.LANDING}
       <div in:fly={getTransitionProps()} out:fade={{ duration: 200 }}>
-        <LandingScreen />
+        <LandingScreenNew />
       </div>
     {:else if currentAppState === APP_STATES.COMPARISON}
       <div in:fly={getTransitionProps()} out:fade={{ duration: 200 }}>
@@ -191,24 +260,44 @@
 
 <style>
   :global(:root) {
-    /* Dark theme variables */
-    --bg-color: #121212;
-    --text-color: #e0e0e0;
-    --card-bg: #1e1e1e;
-    --card-border: #333;
-    --primary-color: #66BB6A;
-    --primary-hover: #81C784;
-    --secondary-color: #42A5F5;
-    --secondary-hover: #64B5F6;
-    --accent-color: #AB47BC;
-    --accent-hover: #BA68C8;
-    --muted-color: #aaa;
-    --progress-bg: #333;
-    --vs-color: #bbb;
-    --focus-ring: rgba(100, 181, 246, 0.6);
-    --keyboard-hint-bg: #333;
-    --button-bg: rgba(255, 255, 255, 0.1);
-    --button-hover: rgba(255, 255, 255, 0.2);
+    /* Dark theme variables - refined palette with better contrast */
+    --bg-color: #0f172a; /* Deep blue-gray background */
+    --text-color: #f8fafc; /* Very light gray-blue text for maximum contrast */
+    --card-bg: #1e293b; /* Slightly lighter background for cards */
+    --card-border: #334155; /* Subtle border for depth */
+    --card-hover-border: #475569; /* Border on hover for better distinction */
+    --card-selected-border: #10b981; /* Green teal border for selection */
+    
+    /* Primary action colors - Teal-based */
+    --primary-color: #10b981; /* Vibrant teal */
+    --primary-hover: #34d399; /* Lighter teal for hover */
+    --primary-focus: rgba(16, 185, 129, 0.5); /* For focus states */
+    
+    /* Secondary action colors - Indigo-based */
+    --secondary-color: #6366f1; /* Vibrant indigo */
+    --secondary-hover: #818cf8; /* Lighter indigo for hover */
+    --secondary-focus: rgba(99, 102, 241, 0.5); /* For focus states */
+    
+    /* Accent colors - Rose-based */
+    --accent-color: #f43f5e; /* Vibrant rose */
+    --accent-hover: #fb7185; /* Lighter rose for hover */
+    
+    /* Text and utility colors */
+    --muted-color: #cbd5e1; /* Subtle text color with better contrast */
+    --progress-bg: #334155; /* Progress bar background */
+    --vs-color: #f1f5f9; /* VS text in comparison with better contrast */
+    
+    /* Interactive elements */
+    --focus-ring: rgba(99, 102, 241, 0.6); /* Focus indicator */
+    --keyboard-hint-bg: #475569; /* Background for keyboard hint */
+    --button-bg: rgba(99, 102, 241, 0.15); /* Subtle button background */
+    --button-hover: rgba(99, 102, 241, 0.25); /* Hover state for buttons */
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
   }
   
   :global(body) {
@@ -219,6 +308,8 @@
     background-color: var(--bg-color);
     color: var(--text-color);
     transition: background-color 0.3s ease, color 0.3s ease;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
   }
   
   :global(*, *::before, *::after) {
@@ -227,16 +318,75 @@
   
   :global(button) {
     cursor: pointer;
+    font-weight: 500;
+    border-radius: 6px;
+    padding: 10px 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  
+  :global(button:hover) {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  :global(button:focus) {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-focus);
+  }
+  
+  :global(button.secondary) {
+    background-color: var(--secondary-color);
+  }
+  
+  :global(button.secondary:hover) {
+    background-color: var(--secondary-hover);
+  }
+  
+  :global(button.secondary:focus) {
+    box-shadow: 0 0 0 3px var(--secondary-focus);
+  }
+  
+  :global(button.accent) {
+    background-color: var(--accent-color);
+  }
+  
+  :global(button.accent:hover) {
+    background-color: var(--accent-hover);
+  }
+  
+  :global(h1, h2, h3, h4, h5, h6) {
+    font-weight: 600;
+    line-height: 1.2;
+    margin-top: 0;
+    color: var(--text-color);
+  }
+  
+  :global(a) {
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  :global(a:hover) {
+    color: var(--secondary-hover);
+    text-decoration: underline;
   }
   
   .app-container {
     position: relative;
     min-height: 100vh;
+    background: linear-gradient(to bottom, var(--bg-color), #131d35);
   }
   
   main {
     min-height: 100vh;
-    padding: 20px;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
   }
   
   .app-controls {
@@ -252,18 +402,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    border: none;
+    border: 1px solid var(--card-border);
     background-color: var(--button-bg);
     color: var(--text-color);
-    transition: all 0.3s ease;
+    padding: 0;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
   }
   
   .help-button:hover {
     background-color: var(--button-hover);
-    transform: scale(1.1);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+    border-color: var(--card-hover-border);
   }
   
   .control-button:focus {
@@ -277,7 +431,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -291,60 +446,107 @@
     width: 100%;
     max-height: 80vh;
     overflow-y: auto;
-    background-color: var(--card-bg);
-    border-radius: 10px;
-    padding: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background-color: #0f172a; /* Darker background for better contrast */
+    background: linear-gradient(to bottom, #1e293b, #0f172a); /* Gradient background */
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--card-border);
+  }
+  
+  .help-content::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .help-content::-webkit-scrollbar-track {
+    background: var(--card-bg);
+    border-radius: 8px;
+  }
+  
+  .help-content::-webkit-scrollbar-thumb {
+    background: var(--card-border);
+    border-radius: 8px;
+  }
+  
+  .help-content::-webkit-scrollbar-thumb:hover {
+    background: var(--card-hover-border);
   }
   
   .close-button {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 30px;
-    height: 30px;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    border: none;
-    background-color: var(--theme-button-bg);
+    border: 1px solid var(--card-border);
+    background-color: var(--button-bg);
     color: var(--text-color);
     font-size: 24px;
+    font-weight: 400;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    padding: 0;
   }
   
   .close-button:hover {
-    background-color: var(--theme-button-hover);
+    background-color: var(--button-hover);
+    transform: scale(1.05);
+    border-color: var(--card-hover-border);
   }
   
   .help-content h2 {
     margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 24px;
+    margin-bottom: 24px;
+    font-size: 28px;
     color: var(--text-color);
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 12px;
   }
   
   .help-content h3 {
-    margin-top: 20px;
-    margin-bottom: 10px;
-    font-size: 18px;
-    color: var(--text-color);
+    margin-top: 24px;
+    margin-bottom: 12px;
+    font-size: 20px;
+    color: #34d399; /* Lighter teal color for better contrast */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
   }
   
   .help-content p, 
   .help-content li {
-    color: var(--text-color);
-    line-height: 1.5;
+    color: white; /* Pure white for maximum contrast */
+    line-height: 1.6;
+  }
+  
+  .help-content strong {
+    color: #a5b4fc; /* Lighter indigo for better contrast */
+    font-weight: 600;
   }
   
   .help-content ul,
   .help-content ol {
-    padding-left: 20px;
+    padding-left: 24px;
   }
   
-  .help-content li {
-    margin-bottom: 5px;
+  .help-content ul li {
+    margin-bottom: 8px;
+    position: relative;
+  }
+  
+  .help-content ol li {
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+  
+  .help-content ul li::marker {
+    color: #fb7185; /* Lighter accent color for better contrast */
+  }
+  
+  .help-content ol li::marker {
+    color: #a5b4fc; /* Lighter secondary color for better contrast */
+    font-weight: 600;
   }
 </style>

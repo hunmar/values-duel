@@ -34,22 +34,48 @@
   .progress-info {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 5px;
-    font-size: 0.9rem;
-    color: #666;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    font-weight: 500;
   }
 
   .progress-bar {
-    height: 12px;
-    background-color: #e0e0e0;
-    border-radius: 6px;
+    height: 10px;
+    background-color: var(--progress-bg);
+    border-radius: 5px;
     overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    position: relative;
   }
 
   .progress-fill {
     height: 100%;
-    background-color: #4CAF50;
-    border-radius: 6px;
-    transition: width 0.5s ease-in-out;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    border-radius: 5px;
+    transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    animation: shine 2s infinite;
+  }
+  
+  @keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
 </style>

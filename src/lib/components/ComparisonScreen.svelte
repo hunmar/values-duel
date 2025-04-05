@@ -5,7 +5,7 @@
   import foodItems from '../stores/foodItems.js';
   import { selectComparisonPair, updateRatings } from '../utils/eloRating.js';
   import FoodCard from './FoodCard.svelte';
-  import ProgressBar from './ProgressBar.svelte';
+  import { Progress } from '../ui';
   
   let foodList = [];
   let currentState = {};
@@ -244,9 +244,12 @@
     <p>Click or tap on your choice</p>
   </header>
   
-  <ProgressBar 
-    current={currentState.completedComparisons} 
-    total={currentState.totalComparisons} 
+  <Progress 
+    value={currentState.completedComparisons || 0} 
+    max={currentState.totalComparisons || 100} 
+    showValue={true}
+    label="Progress"
+    className="progress-bar"
   />
   
   <div class="comparison-cards" role="group" aria-label="Food comparison">
@@ -294,6 +297,19 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
+    position: relative;
+  }
+  
+  .comparison-container::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.1), transparent 70%);
+    z-index: -1;
+    pointer-events: none;
   }
   
   header {
@@ -304,20 +320,37 @@
   h1 {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
-    color: #333;
+    color: var(--text-color);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
   
   header p {
     font-size: 1.2rem;
-    color: #666;
+    color: var(--muted-color);
+    font-weight: 500;
   }
   
   .comparison-cards {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 2rem;
-    margin: 2rem 0;
+    gap: 3rem;
+    margin: 3rem 0;
+    position: relative;
+  }
+  
+  .comparison-cards::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100px;
+    bottom: -20px;
+    background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.05), transparent 70%);
+    filter: blur(10px);
+    z-index: -1;
+    pointer-events: none;
   }
   
   .card-wrapper {
@@ -330,42 +363,79 @@
   .keyboard-hint {
     margin-top: 1rem;
     font-size: 0.9rem;
-    color: #777;
+    color: var(--secondary-color);
+    background-color: rgba(99, 102, 241, 0.15);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    font-weight: 500;
   }
   
   .card-wrapper:focus-within .keyboard-hint {
     opacity: 1;
+    transform: translateY(-5px);
   }
   
   .vs-indicator {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
+    position: relative;
   }
   
   .vs-indicator span {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #999;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--vs-color);
+    background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 2;
+  }
+  
+  .vs-indicator span::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
+    z-index: -1;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
   
   .keyboard-instructions {
-    font-size: 0.85rem;
-    color: #777;
-    background-color: #f0f0f0;
-    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    background-color: var(--keyboard-hint-bg);
+    padding: 0.6rem 1.2rem;
     border-radius: 20px;
     white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--card-border);
   }
   
   .comparison-info {
     text-align: center;
-    margin-top: 2rem;
+    margin-top: 2.5rem;
     font-size: 1.1rem;
-    color: #666;
+    color: var(--muted-color);
+    font-weight: 500;
+    background-color: rgba(99, 102, 241, 0.1);
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-sm);
   }
   
   @media (max-width: 768px) {
@@ -374,31 +444,63 @@
     }
     
     .vs-indicator {
-      margin: 1rem 0;
+      margin: 1.5rem 0;
+    }
+    
+    h1 {
+      font-size: 2rem;
     }
   }
   
   /* Animation styles */
   .comparison-cards.choice-made .food-card:not(.winner-selected) {
-    opacity: 0.6;
-    transform: scale(0.95);
+    opacity: 0.4;
+    transform: scale(0.94);
+    filter: grayscale(0.5);
+    border-color: var(--card-border);
   }
   
   .food-card.winner-selected {
-    transform: scale(1.05) translateY(-10px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05) translateY(-15px);
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(16, 185, 129, 0.3);
     z-index: 10;
+    border-color: var(--card-selected-border);
+  }
+  
+  .food-card.winner-selected::after {
+    content: "✓";
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 40px;
+    height: 40px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.4rem;
+    box-shadow: var(--shadow-lg);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    z-index: 15;
+  }
+  
+  @keyframes popIn {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.2); }
+    100% { transform: scale(1); }
   }
   
   .comparison-cards.transition-out {
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   .comparison-cards.transition-in {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 </style>
