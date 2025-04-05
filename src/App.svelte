@@ -4,7 +4,7 @@
   import { APP_STATES, THEMES, applyTheme } from './lib/stores/appState.js';
   import appState from './lib/stores/appState.js';
   import foodItems from './lib/stores/foodItems.js';
-  import { STORAGE_KEYS, loadFromLocalStorage } from './lib/utils/localStorage.js';
+  import { STORAGE_KEYS, loadFromLocalStorage, clearFromLocalStorage } from './lib/utils/localStorage.js';
   import LandingScreen from './lib/components/LandingScreen.svelte';
   import ComparisonScreen from './lib/components/ComparisonScreen.svelte';
   import ResultsScreen from './lib/components/ResultsScreen.svelte';
@@ -13,7 +13,23 @@
   let previousAppState = null;
   let showHelp = false;
   
+  // Import SVG image creation function from the foodItems module
+  let createSVGImageData;
+  import('./lib/stores/foodItems.js').then(module => {
+    if (module.createSVGImageData) {
+      createSVGImageData = module.createSVGImageData;
+    } else {
+      // Fallback simple function if not exported
+      createSVGImageData = (name) => {
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="400" viewBox="0 0 500 400"><rect width="500" height="400" fill="#333" rx="15" ry="15"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#fff">${name}</text></svg>`)}`;
+      };
+    }
+  });
+
   onMount(() => {
+    // Clear any stored food items to force the new food list to be used
+    clearFromLocalStorage(STORAGE_KEYS.FOOD_ITEMS);
+    
     // Check if there are shared results in the URL
     const urlParams = new URLSearchParams(window.location.search);
     const sharedResults = urlParams.get('results');
@@ -32,13 +48,19 @@
         }));
         
         // Create temporary food items for displaying the shared results
-        const sharedFoodItems = decodedData.map((item, index) => ({
-          id: index + 1,
-          name: item.name,
-          rating: item.rating,
-          description: `Ranked #${item.position}`,
-          imageUrl: 'https://via.placeholder.com/150'
-        }));
+        const sharedFoodItems = decodedData.map((item, index) => {
+          const imageUrl = createSVGImageData 
+            ? createSVGImageData(item.name, '#ffffff', '#333333')
+            : `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="400" viewBox="0 0 500 400"><rect width="500" height="400" fill="#333" rx="15" ry="15"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#fff">${item.name}</text></svg>`)}`;
+          
+          return {
+            id: index + 1,
+            name: item.name,
+            rating: item.rating,
+            description: `Ranked #${item.position}`,
+            imageUrl
+          };
+        });
         
         // Update the food items store
         foodItems.set(sharedFoodItems);
@@ -50,13 +72,9 @@
       }
     } else {
       // No shared results, load from localStorage as usual
-      const savedFoodItems = loadFromLocalStorage(STORAGE_KEYS.FOOD_ITEMS);
       const savedAppState = loadFromLocalStorage(STORAGE_KEYS.APP_STATE);
       
-      // Restore food items if available
-      if (savedFoodItems) {
-        foodItems.set(savedFoodItems);
-      }
+      // We intentionally don't load saved food items to use our new list
       
       // Restore app state if available
       if (savedAppState) {

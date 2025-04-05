@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 
 // Initial food items data
 // Function to create an inline SVG data URL for food images
-function createSVGImageData(name, fgColor = '#333333', bgColor = '#f8f8f8') {
+export function createSVGImageData(name, fgColor = '#333333', bgColor = '#f8f8f8') {
   // Get a generic food icon path based on the food name
   const iconPath = getFoodIcon(name);
   
@@ -78,6 +78,7 @@ function getFoodIcon(name) {
   }
 }
 
+// Completely recreated food items list with Lasagna and Sushi Roll instead of Ice Cream and Chocolate
 const initialFoodItems = [
   {
     id: 1,
