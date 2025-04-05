@@ -82,11 +82,11 @@
   - Improved focus management and tab navigation
   - Added visual indicators for keyboard focus
   - Ensured keyboard accessibility throughout the app
-- Added dark mode with theme toggle (4.5)
-  - Implemented light and dark color schemes
-  - Added system theme detection
-  - Created smooth theme transitions
-  - Added theme toggle button with animation
+- Implemented dark mode for better visuals (4.5)
+  - Applied consistent dark color scheme
+  - Optimized all UI elements for dark background
+  - Enhanced readability with proper contrast
+  - Created cohesive visual experience
 - Added help overlay with documentation (12.3)
   - Created comprehensive help screen
   - Added keyboard shortcut information

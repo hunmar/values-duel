@@ -47,10 +47,12 @@
     height: 400px;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
-    background-color: white;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--card-border);
   }
 
   .food-card:hover {
@@ -90,25 +92,25 @@
   h3 {
     margin: 0 0 8px 0;
     font-size: 1.4rem;
-    color: #333;
+    color: var(--text-color);
   }
 
   p {
     margin: 0;
     font-size: 0.9rem;
-    color: #666;
+    color: var(--muted-color);
     line-height: 1.4;
   }
 
   /* Focus styles for accessibility */
   .food-card:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+    box-shadow: 0 0 0 3px var(--focus-ring);
   }
   
   .food-card.keyboard-accessible:focus {
     transform: translateY(-10px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(66, 153, 225, 0.6);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), 0 0 0 3px var(--focus-ring);
   }
   
   /* Add a visual indicator for keyboard access */
