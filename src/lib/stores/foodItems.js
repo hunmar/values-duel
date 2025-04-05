@@ -41,14 +41,14 @@ const initialFoodItems = [
     id: 6,
     name: 'Ice Cream',
     description: 'A frozen dessert made from cream, milk, and sugar, often with fruits, nuts, or other flavorings',
-    imageUrl: 'https://images.unsplash.com/photo-1563589173576-64d9ff421906?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    imageUrl: 'https://images.unsplash.com/photo-1629385744943-c96d2288fb5c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
     rating: 1200
   },
   {
     id: 7,
     name: 'Chocolate',
     description: 'Sweet food product made from roasted and ground cacao seeds',
-    imageUrl: 'https://images.unsplash.com/photo-1606312618070-d48b4c652a52?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    imageUrl: 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
     rating: 1200
   },
   {

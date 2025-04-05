@@ -115,7 +115,13 @@
     <div class="food-grid">
       {#each foodList as food}
         <div class="food-item">
-          <img src={food.imageUrl} alt={food.name} />
+          <img 
+            src={food.imageUrl} 
+            alt={food.name} 
+            on:error={(e) => {
+              e.target.src = 'https://via.placeholder.com/150x100?text=No+Image';
+            }}
+          />
           <h3>{food.name}</h3>
         </div>
       {/each}

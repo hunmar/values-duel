@@ -148,7 +148,13 @@
       <div class="ranked-item">
         <div class="rank">{index + 1}</div>
         <div class="food-image">
-          <img src={food.imageUrl} alt={food.name} />
+          <img 
+            src={food.imageUrl} 
+            alt={food.name} 
+            on:error={(e) => {
+              e.target.src = 'https://via.placeholder.com/80x80?text=No+Image';
+            }}
+          />
         </div>
         <div class="food-info">
           <h3>{food.name}</h3>

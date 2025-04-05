@@ -17,7 +17,14 @@
   aria-pressed={selected}
 >
   <div class="food-image">
-    <img src={food.imageUrl} alt={food.name} />
+    <img 
+      src={food.imageUrl} 
+      alt={food.name} 
+      on:error={(e) => {
+        // Replace broken image with a placeholder
+        e.target.src = 'https://via.placeholder.com/320x220?text=No+Image';
+      }}
+    />
   </div>
   <div class="food-info">
     <h3>{food.name}</h3>
