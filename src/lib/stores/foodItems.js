@@ -60,10 +60,10 @@ function getFoodIcon(name) {
     return '<rect x="-120" y="-100" width="240" height="200" rx="20" ry="20" fill="#fff5dd" stroke="#cc6600" stroke-width="5"/><path d="M-80,-50 Q0,50 80,-50" stroke="#cc6600" stroke-width="10" fill="none"/><path d="M-80,0 Q0,100 80,0" stroke="#cc6600" stroke-width="10" fill="none"/>';
   } else if (lowerName.includes('tacos')) {
     return '<path d="M-120,-50 C-100,100 100,100 120,-50 Z" fill="#e2b280" stroke="#663300" stroke-width="5"/><path d="M-80,-30 L-80,30 M-40,-30 L-40,30 M0,-30 L0,30 M40,-30 L40,30 M80,-30 L80,30" stroke="#c55a11" stroke-width="8"/>';
-  } else if (lowerName.includes('ice cream')) {
-    return '<path d="M-30,-100 L30,-100 L60,50 C60,100 -60,100 -60,50 Z" fill="#ffffff" stroke="#2b68a7" stroke-width="5"/><circle cx="0" cy="-40" r="30" fill="#e8f5ff" stroke="#2b68a7" stroke-width="3"/>';
-  } else if (lowerName.includes('chocolate')) {
-    return '<rect x="-100" y="-60" width="200" height="120" rx="5" ry="5" fill="#472a18" stroke="#ffd95c" stroke-width="5"/><path d="M-100,-20 L100,-20 M-100,20 L100,20 M-50,-60 L-50,60 M0,-60 L0,60 M50,-60 L50,60" stroke="#ffd95c" stroke-width="5"/>';
+  } else if (lowerName.includes('lasagna')) {
+    return '<rect x="-120" y="-80" width="240" height="160" rx="5" ry="5" fill="#9c3d25" stroke="#ffffff" stroke-width="5"/><path d="M-120,-40 L120,-40 M-120,0 L120,0 M-120,40 L120,40" stroke="#ffffff" stroke-width="5"/><circle cx="-50" cy="-60" r="10" fill="#ffcc00"/><circle cx="50" cy="-20" r="10" fill="#ffcc00"/><circle cx="0" cy="20" r="10" fill="#ffcc00"/>';
+  } else if (lowerName.includes('sushi roll')) {
+    return '<rect x="-120" y="-40" width="240" height="80" rx="40" ry="40" fill="#222222" stroke="#4caf50" stroke-width="5"/><rect x="-110" y="-30" width="220" height="60" rx="30" ry="30" fill="#ffffff"/><rect x="-90" y="-20" width="180" height="40" rx="20" ry="20" fill="#ff9966"/><line x1="-120" y1="0" x2="120" y2="0" stroke="#4caf50" stroke-width="2"/>';
   } else if (lowerName.includes('curry')) {
     return '<circle cx="0" cy="0" r="120" fill="#fff2cc" stroke="#cc6600" stroke-width="10"/><path d="M-50,-50 C-30,-20 -60,20 -50,50 M0,-50 C20,-20 -20,20 0,50 M50,-50 C70,-20 40,20 50,50" stroke="#cc6600" stroke-width="8" fill="none"/>';
   } else if (lowerName.includes('sushi')) {
@@ -116,16 +116,16 @@ const initialFoodItems = [
   },
   {
     id: 6,
-    name: 'Ice Cream',
-    description: 'A frozen dessert made from cream, milk, and sugar, often with fruits, nuts, or other flavorings',
-    imageUrl: createSVGImageData('Ice Cream', '#2b68a7', '#e8f5ff'),
+    name: 'Lasagna',
+    description: 'Italian dish consisting of stacked layers of pasta with sauce, cheese, and various fillings',
+    imageUrl: createSVGImageData('Lasagna', '#ffffff', '#9c3d25'),
     rating: 1200
   },
   {
     id: 7,
-    name: 'Chocolate',
-    description: 'Sweet food product made from roasted and ground cacao seeds',
-    imageUrl: createSVGImageData('Chocolate', '#ffd95c', '#472a18'),
+    name: 'Sushi Roll',
+    description: 'Japanese dish with vinegared rice and various fillings wrapped in seaweed',
+    imageUrl: createSVGImageData('Sushi Roll', '#4caf50', '#222222'),
     rating: 1200
   },
   {
