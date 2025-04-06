@@ -9,6 +9,7 @@
   import LandingScreenNew from './lib/components/LandingScreenNew.svelte';
   import ComparisonScreen from './lib/components/ComparisonScreen.svelte';
   import ResultsScreenNew from './lib/components/ResultsScreenNew.svelte';
+  import AnalyticsScreen from './lib/components/AnalyticsScreen.svelte';
   
   let currentAppState = APP_STATES.LANDING;
   let previousAppState = null;
@@ -250,7 +251,8 @@
     // Moving forward in the app flow
     if (
       (previousAppState === APP_STATES.LANDING && currentAppState === APP_STATES.COMPARISON) ||
-      (previousAppState === APP_STATES.COMPARISON && currentAppState === APP_STATES.RESULTS)
+      (previousAppState === APP_STATES.COMPARISON && currentAppState === APP_STATES.RESULTS) ||
+      (previousAppState === APP_STATES.RESULTS && currentAppState === APP_STATES.ANALYTICS)
     ) {
       return { 
         x: 300, 
@@ -264,7 +266,8 @@
     else if (
       (previousAppState === APP_STATES.COMPARISON && currentAppState === APP_STATES.LANDING) ||
       (previousAppState === APP_STATES.RESULTS && currentAppState === APP_STATES.COMPARISON) ||
-      (previousAppState === APP_STATES.RESULTS && currentAppState === APP_STATES.LANDING)
+      (previousAppState === APP_STATES.RESULTS && currentAppState === APP_STATES.LANDING) ||
+      (previousAppState === APP_STATES.ANALYTICS && currentAppState === APP_STATES.RESULTS)
     ) {
       return { 
         x: -300, 
@@ -366,6 +369,14 @@
         class="screen-container"
       >
         <ResultsScreenNew />
+      </div>
+    {:else if currentAppState === APP_STATES.ANALYTICS}
+      <div 
+        in:fly={getTransitionProps()} 
+        out:fade={{ duration: 300, easing: cubicOut }}
+        class="screen-container"
+      >
+        <AnalyticsScreen />
       </div>
     {/if}
   </main>

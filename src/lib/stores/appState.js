@@ -4,7 +4,8 @@ import { writable } from 'svelte/store';
 export const APP_STATES = {
   LANDING: 'landing',
   COMPARISON: 'comparison',
-  RESULTS: 'results'
+  RESULTS: 'results',
+  ANALYTICS: 'analytics'
 };
 
 // Theme options

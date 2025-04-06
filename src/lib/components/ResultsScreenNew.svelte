@@ -7,6 +7,13 @@
   import { STORAGE_KEYS, saveToLocalStorage, clearAllAppData } from '../utils/localStorage.js';
   import { Container, Heading, Text, Button, Card, CardContent, Badge, Dialog } from '../ui';
   
+  function navigateToAnalytics() {
+    appState.update(state => ({
+      ...state,
+      currentState: APP_STATES.ANALYTICS
+    }));
+  }
+  
   let rankedFoodItems = [];
   let shareUrl = null;
   let copySuccess = false;
@@ -348,6 +355,10 @@
             {#if !isSharedResult}
               <Button variant="accent" className="action-button" on:click={generateShareableLink}>
                 Share Results
+              </Button>
+              
+              <Button variant="outline" className="action-button" on:click={navigateToAnalytics}>
+                View Analytics
               </Button>
             {/if}
           </div>
