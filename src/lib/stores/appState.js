@@ -19,7 +19,8 @@ const initialState = {
   totalComparisons: 0,
   completedComparisons: 0,
   comparisonHistory: [],
-  theme: THEMES.DARK
+  theme: THEMES.DARK,
+  isDemoMode: false
 };
 
 // Create the writable store

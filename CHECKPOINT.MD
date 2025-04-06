@@ -239,6 +239,14 @@
   - Created personalized food recommendations based on top preferences
   - Improved data visualization with Chart.js for responsive analytics
 
+### April 25, 2025 (Planned)
+- Add demo mode for first-time users (7.2, 7.6, 11.2)
+  - Create automated demo feature to showcase app functionality
+  - Implement simulated comparisons with predefined choices
+  - Add ability to skip to results for quick preview
+  - Create informative tooltips explaining key features
+  - Enhance onboarding experience for new users
+
 ### Development Notes
 - Component organization: Keep all UI components in src/lib/ui and domain-specific components in src/lib/components
 - Variable naming: Continue using camelCase for variables, PascalCase for components

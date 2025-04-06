@@ -3,7 +3,7 @@
   import { APP_STATES } from '../stores/appState.js';
   import appState from '../stores/appState.js';
   import foodItems from '../stores/foodItems.js';
-  import { calculateMinComparisons } from '../utils/eloRating.js';
+  import { calculateMinComparisons, updateRatings } from '../utils/eloRating.js';
   import { Container, Heading, Text, Button, Card, CardContent, Badge } from '../ui';
   
   let foodList = [];
@@ -102,6 +102,82 @@
   
   function showImportFormat() {
     showFormatInfo = true;
+  }
+  
+  function startDemoMode() {
+    // Make sure we have at least 5 food items for a meaningful demo
+    if (!foodList || foodList.length < 5) {
+      alert("Not enough food items to run a demo. Please try again later.");
+      return;
+    }
+    
+    // Create a simulated comparison history with predefined choices
+    // We'll take the first 5 most visually distinct food items for the demo
+    const demoItems = foodList.slice(0, 5);
+    const demoComparisons = [];
+    const timestamp = Date.now();
+    
+    // Create predefined comparisons that show pizza winning
+    let pizzaItem = demoItems.find(item => item.name.toLowerCase().includes('pizza'));
+    if (!pizzaItem) pizzaItem = demoItems[0]; // Fallback if no pizza
+    
+    // Update the ratings for each comparison
+    const demoRatings = {};
+    demoItems.forEach(item => {
+      demoRatings[item.id] = 1200; // Start all with base rating
+    });
+    
+    // Create a series of comparisons where pizza (or first item) wins most
+    for (let i = 0; i < demoItems.length - 1; i++) {
+      // Skip if comparing the same item (pizza to pizza)
+      if (demoItems[i].id === pizzaItem.id) continue;
+      
+      // Create winner/loser based on predetermined outcome
+      const itemA = demoItems[i];
+      const itemB = demoItems[(i + 1) % demoItems.length];
+      
+      // Make pizzaItem win 75% of the time for demo purposes
+      const winner = Math.random() < 0.75 ? pizzaItem : (itemA.id !== pizzaItem.id ? itemA : itemB);
+      const loser = winner.id === itemA.id ? itemB : itemA;
+      
+      // Calculate the rating change
+      const ratingA = demoRatings[itemA.id];
+      const ratingB = demoRatings[itemB.id];
+      const actualOutcomeA = winner.id === itemA.id ? 1 : 0;
+      
+      const { newRatingA, newRatingB } = updateRatings(ratingA, ratingB, actualOutcomeA);
+      
+      // Update our tracked ratings
+      demoRatings[itemA.id] = newRatingA;
+      demoRatings[itemB.id] = newRatingB;
+      
+      // Add to demo comparison history
+      demoComparisons.push({
+        itemA: { ...itemA, rating: ratingA },
+        itemB: { ...itemB, rating: ratingB },
+        winner: { ...winner, rating: winner.id === itemA.id ? newRatingA : newRatingB },
+        loser: { ...loser, rating: loser.id === itemA.id ? newRatingA : newRatingB },
+        timestamp: timestamp - (demoItems.length - i) * 5000 // Stagger timestamps for realism
+      });
+    }
+    
+    // Set demo mode to true and update the app state
+    appState.update(state => ({
+      ...state,
+      currentState: APP_STATES.RESULTS, // Skip directly to results for demo
+      totalComparisons: demoComparisons.length,
+      completedComparisons: demoComparisons.length,
+      comparisonHistory: demoComparisons,
+      isDemoMode: true
+    }));
+    
+    // Update food items with the simulated ratings
+    foodItems.update(items => {
+      return items.map(item => ({
+        ...item,
+        rating: demoRatings[item.id] || item.rating
+      }));
+    });
   }
 </script>
 
@@ -205,9 +281,17 @@
   </div>
   
   <div class="start-section">
-    <Button variant="default" className="start-button" on:click={startRanking}>
-      Start Ranking
-    </Button>
+    <div class="start-buttons">
+      <Button variant="default" className="start-button" on:click={startRanking}>
+        Start Ranking
+      </Button>
+      <Button variant="outline" className="demo-button" on:click={startDemoMode}>
+        Try Demo
+      </Button>
+    </div>
+    <Text size="sm" muted={true} className="demo-hint">
+      New here? Try the demo to see how it works.
+    </Text>
   </div>
   
   {#if showFormatInfo}
@@ -409,10 +493,26 @@
     text-align: center;
   }
   
+  .start-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
   .start-button {
     font-size: 1.25rem;
     padding: 0.75rem 2.5rem;
     font-weight: 600;
+  }
+  
+  .demo-button {
+    font-size: 1.25rem;
+    padding: 0.75rem 2rem;
+  }
+  
+  :global(.demo-hint) {
+    opacity: 0.7;
   }
   
   .format-overlay {

@@ -19,6 +19,7 @@
   let preferenceClusters = [];
   let personalizedRecommendations = [];
   let currentTab = 'statistics';
+  let isDemoMode = false;
   let statsHighlights = {
     highestRated: null,
     lowestRated: null,
@@ -45,6 +46,7 @@
     
     const unsubscribeAppState = appState.subscribe(state => {
       comparisonHistory = state.comparisonHistory || [];
+      isDemoMode = state.isDemoMode || false;
       statsHighlights.totalComparisons = comparisonHistory.length;
       
       // Generate progression data for charts
@@ -568,6 +570,26 @@
     }));
   }
   
+  function exitDemo() {
+    // Reset app state and return to landing
+    appState.update(state => ({
+      ...state,
+      currentState: APP_STATES.LANDING,
+      totalComparisons: 0,
+      completedComparisons: 0,
+      comparisonHistory: [],
+      isDemoMode: false
+    }));
+    
+    // Reset food item ratings to 1200
+    foodItems.update(items => 
+      items.map(item => ({
+        ...item,
+        rating: 1200
+      }))
+    );
+  }
+  
   // Tab handling
   function setActiveTab(tab) {
     currentTab = tab;
@@ -590,6 +612,17 @@
   <header>
     <Heading>Analytics Dashboard</Heading>
     <Text lead={true}>Insights and analysis of your food preferences</Text>
+    
+    {#if isDemoMode}
+      <div class="demo-banner">
+        <Badge variant="accent">Demo Mode</Badge>
+        <Text size="sm">This is sample data to demonstrate analytics features</Text>
+        <Button variant="secondary" className="exit-demo-button" on:click={exitDemo}>
+          Exit Demo
+        </Button>
+      </div>
+    {/if}
+    
     <Button variant="outline" on:click={navigateToResults}>Return to Results</Button>
   </header>
 
@@ -994,6 +1027,18 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .demo-banner {
+    margin: 1rem 0;
+    padding: 0.75rem 1.5rem;
+    background: rgba(244, 63, 94, 0.15);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 0.5rem;
   }
   

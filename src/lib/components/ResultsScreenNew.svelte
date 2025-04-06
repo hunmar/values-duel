@@ -18,8 +18,29 @@
   let shareUrl = null;
   let copySuccess = false;
   let isSharedResult = false;
+  let isDemoMode = false;
   let showQrCode = false;
   let qrCodeDataUrl = '';
+  
+  function exitDemo() {
+    // Reset app state and return to landing
+    appState.update(state => ({
+      ...state,
+      currentState: APP_STATES.LANDING,
+      totalComparisons: 0,
+      completedComparisons: 0,
+      comparisonHistory: [],
+      isDemoMode: false
+    }));
+    
+    // Reset food item ratings to 1200
+    foodItems.update(items => 
+      items.map(item => ({
+        ...item,
+        rating: 1200
+      }))
+    );
+  }
   
   // Function to generate a QR Code for the share URL
   async function generateQrCode() {
@@ -110,6 +131,7 @@
     // Subscribe to the app state store to check if this is a shared result
     const unsubscribeAppState = appState.subscribe(state => {
       isSharedResult = state.isSharedResult || false;
+      isDemoMode = state.isDemoMode || false;
     });
     
     // Subscribe to the foodItems store
@@ -117,8 +139,8 @@
       // Sort items by rating
       rankedFoodItems = sortItemsByRating(items);
       
-      // Save the final rankings to localStorage only if not a shared result
-      if (!isSharedResult) {
+      // Save the final rankings to localStorage only if not a shared result or demo
+      if (!isSharedResult && !isDemoMode) {
         saveToLocalStorage(STORAGE_KEYS.FOOD_ITEMS, items);
       }
     });
@@ -261,6 +283,16 @@
         <Badge variant="secondary" className="shared-badge">Shared Results</Badge>
         <Heading className="results-title">Food Preference Ranking</Heading>
         <Text lead={true}>Someone shared their food preferences with you</Text>
+      {:else if isDemoMode}
+        <Badge variant="accent" className="demo-badge">Demo Mode</Badge>
+        <Heading className="results-title">Sample Food Ranking</Heading>
+        <Text lead={true}>This is a demo of how the app ranks your food preferences</Text>
+        <div class="demo-note">
+          <Text size="sm">Try the full version to discover your own preferences!</Text>
+          <Button variant="secondary" className="exit-demo-button" on:click={exitDemo}>
+            Exit Demo
+          </Button>
+        </div>
       {:else}
         <div class="trophy-icon">🏆</div>
         <Heading className="results-title">Your Food Preference Ranking</Heading>
@@ -517,8 +549,22 @@
     margin-bottom: 0.5rem;
   }
   
-  .shared-badge {
+  .shared-badge,
+  .demo-badge {
     margin-bottom: 1rem;
+  }
+  
+  .demo-note {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  :global(.exit-demo-button) {
+    font-size: 0.9rem;
+    padding: 0.5rem 1.25rem;
   }
   
   .top-choice {
