@@ -102,6 +102,9 @@
     // Clear any stored food items to force the new food list to be used
     clearFromLocalStorage(STORAGE_KEYS.FOOD_ITEMS);
     
+    // Load saved app state from local storage
+    const savedAppState = loadFromLocalStorage(STORAGE_KEYS.APP_STATE);
+    
     // Check if there are shared results in the URL
     const urlParams = new URLSearchParams(window.location.search);
     const sharedResults = urlParams.get('results');
@@ -251,8 +254,7 @@
         console.error('Error parsing shared results:', error);
       }
     } else {
-      // No shared results, load from localStorage as usual
-      const savedAppState = loadFromLocalStorage(STORAGE_KEYS.APP_STATE);
+      // No shared results, use the savedAppState loaded earlier
       
       // We intentionally don't load saved food items to use our new list
       
