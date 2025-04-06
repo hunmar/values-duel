@@ -7,6 +7,7 @@
   import FoodCard from './FoodCard.svelte';
   import { Progress, Badge } from '../ui';
   
+  // Data state
   let foodList = [];
   let currentState = {};
   let itemA = null;
@@ -20,6 +21,13 @@
   let updatedRatings = {};
   let newRatingA = null;
   let newRatingB = null;
+  
+  // Animation state variables
+  let transitionIn = false;
+  let transitionOut = false;
+  let leftRatingUpdating = false;
+  let rightRatingUpdating = false;
+  let winnerItemId = null;
   
   // Subscribe to stores
   // Handle keyboard navigation
@@ -167,24 +175,8 @@
       [itemB.id]: { oldRating: itemB.rating, newRating: ratings.newRatingB }
     };
     
-    // Add animation class to show selection feedback
-    const comparisonCards = document.querySelector('.comparison-cards');
-    if (comparisonCards) {
-      comparisonCards.classList.add('choice-made');
-    }
-    
-    // Play a subtle animation on the selected card
-    const selectedCardElement = winningItem.id === itemA.id 
-      ? document.querySelector('.comparison-cards .food-card:first-child')
-      : document.querySelector('.comparison-cards .food-card:last-child');
-    
-    if (selectedCardElement) {
-      selectedCardElement.classList.add('winner-selected');
-    }
-    
-    // Get rating display elements to create a more dramatic effect
-    const leftRatingEl = document.querySelector('.card-wrapper:first-child .rating-display');
-    const rightRatingEl = document.querySelector('.card-wrapper:last-child .rating-display');
+    // Set winning item ID for class binding in the template
+    winnerItemId = winningItem.id;
     
     // Create a smoother transition for ratings
     setTimeout(() => {
@@ -200,26 +192,26 @@
         });
       });
       
-      // Manually add animation class to rating displays for better visual effect
-      if (winningItem.id === itemA.id && leftRatingEl) {
-        leftRatingEl.classList.add('updating');
-      } else if (winningItem.id === itemB.id && rightRatingEl) {
-        rightRatingEl.classList.add('updating');
+      // Update rating animation states through reactive variables
+      if (winningItem.id === itemA.id) {
+        leftRatingUpdating = true;
+      } else {
+        rightRatingUpdating = true;
       }
       
       // Add animation class to the loser's rating display as well after a short delay
       setTimeout(() => {
-        if (losingItem.id === itemA.id && leftRatingEl) {
-          leftRatingEl.classList.add('updating');
-        } else if (losingItem.id === itemB.id && rightRatingEl) {
-          rightRatingEl.classList.add('updating');
+        if (losingItem.id === itemA.id) {
+          leftRatingUpdating = true;
+        } else {
+          rightRatingUpdating = true;
         }
       }, 200);
       
-      // Remove animation classes after animation completes
+      // Reset animation states after animation completes
       setTimeout(() => {
-        leftRatingEl?.classList.remove('updating');
-        rightRatingEl?.classList.remove('updating');
+        leftRatingUpdating = false;
+        rightRatingUpdating = false;
       }, 1500);
     }, 500); // Delay the rating update for a better visual sequence
     
@@ -245,40 +237,30 @@
       
       // Wait a moment before moving to the next comparison or results (longer delay for better animation)
       timerId = setTimeout(() => {
-        // Reset animation classes
-        const comparisonCards = document.querySelector('.comparison-cards');
-        comparisonCards?.classList.remove('choice-made');
-        document.querySelector('.winner-selected')?.classList.remove('winner-selected');
-        
-        // Make sure rating animation classes are removed
-        document.querySelectorAll('.rating-display.updating').forEach(el => {
-          el.classList.remove('updating');
-        });
+        // Reset animation states
+        selectionMade = false;
+        selectedItem = null;
         
         // Clear updated ratings after animation completes
         updatedRatings = {};
         
         if (nextState === APP_STATES.COMPARISON) {
-          // Add transition-out class for smooth transition between pairs
-          if (comparisonCards) {
-            comparisonCards.classList.add('transition-out');
+          // Set transition states through reactive variables
+          transitionOut = true;
           
-            // Short timeout to allow the transition-out animation to complete
-            setTimeout(() => {
-              selectNextPair();
-              // Remove the transition-out class after new pair is selected
-              comparisonCards.classList.remove('transition-out');
-              comparisonCards.classList.add('transition-in');
-              
-              // Remove the transition-in class after animation completes
-              setTimeout(() => {
-                comparisonCards.classList.remove('transition-in');
-              }, 500);
-            }, 300);
-          } else {
-            // Fallback if element not found
+          // Short timeout to allow the transition-out animation to complete
+          setTimeout(() => {
             selectNextPair();
-          }
+            
+            // Change transition state
+            transitionOut = false;
+            transitionIn = true;
+            
+            // Remove the transition-in class after animation completes
+            setTimeout(() => {
+              transitionIn = false;
+            }, 500);
+          }, 300);
         }
         
         appState.update(s => ({
@@ -310,7 +292,12 @@
     className="progress-bar"
   />
   
-  <div class="comparison-cards" role="group" aria-label="Food comparison">
+  <div class="comparison-cards" 
+    class:choice-made={selectionMade}
+    class:transition-out={transitionOut}
+    class:transition-in={transitionIn}
+    role="group" 
+    aria-label="Food comparison">
     {#if itemA && itemB}
       <div bind:this={leftCardEl} class="card-wrapper">
         <FoodCard 
@@ -318,9 +305,11 @@
           onClick={handleSelection} 
           selected={selectedItem && selectedItem.id === itemA.id}
           keyboardAccessible={true}
+          class="food-card"
+          class:winner-selected={selectedItem && selectedItem.id === itemA.id}
         />
         <div class="keyboard-hint" aria-hidden="true">← Left Arrow</div>
-        <div class="rating-display" class:updating={selectedItem && selectedItem.id === itemA.id}>
+        <div class="rating-display" class:updating={leftRatingUpdating}>
           Rating: {newRatingA ? newRatingA : itemA.rating}
         </div>
       </div>
@@ -338,9 +327,11 @@
           onClick={handleSelection} 
           selected={selectedItem && selectedItem.id === itemB.id}
           keyboardAccessible={true}
+          class="food-card"
+          class:winner-selected={selectedItem && selectedItem.id === itemB.id}
         />
         <div class="keyboard-hint" aria-hidden="true">Right Arrow →</div>
-        <div class="rating-display" class:updating={selectedItem && selectedItem.id === itemB.id}>
+        <div class="rating-display" class:updating={rightRatingUpdating}>
           Rating: {newRatingB ? newRatingB : itemB.rating}
         </div>
       </div>
@@ -659,23 +650,22 @@
     }
   }
   
-  /* Animation styles - these classes are applied through JavaScript DOM manipulation */
-  /* Keep these since they're used dynamically via classList.add/remove */
-  :global(.comparison-cards.choice-made .food-card:not(.winner-selected)) {
+  /* Animation styles using Svelte's scoped CSS with class directives */
+  .comparison-cards.choice-made .food-card:not(.winner-selected) {
     opacity: 0.4;
     transform: scale(0.94);
     filter: grayscale(0.5);
     border-color: var(--card-border);
   }
   
-  :global(.food-card.winner-selected) {
+  :global(.food-card).winner-selected {
     transform: scale(1.05) translateY(-15px);
     box-shadow: var(--shadow-xl), 0 0 20px rgba(16, 185, 129, 0.3);
     z-index: 10;
     border-color: var(--card-selected-border);
   }
   
-  :global(.food-card.winner-selected::after) {
+  :global(.food-card).winner-selected::after {
     content: "✓";
     position: absolute;
     top: -15px;
@@ -706,13 +696,13 @@
     100% { transform: scale(1); }
   }
   
-  :global(.comparison-cards.transition-out) {
+  .comparison-cards.transition-out {
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
-  :global(.comparison-cards.transition-in) {
+  .comparison-cards.transition-in {
     opacity: 1;
     transform: translateY(0);
     transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
