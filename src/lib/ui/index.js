@@ -15,27 +15,30 @@ import Select from './Select.svelte';
 import Switch from './Switch.svelte';
 import Tabs from './Tabs.svelte';
 import Text from './Text.svelte';
+import Toast from './Toast.svelte';
+import ToastContainer from './ToastContainer.svelte';
+import ToastService from './ToastService.js';
 import Tooltip from './Tooltip.svelte';
 
 /**
  * UI Component Library for Taste Duel
- * 
+ *
  * A collection of reusable UI components inspired by the shadcn-ui design system.
  * All components are built with accessibility, theming, and responsive design in mind.
- * 
+ *
  * Usage:
  * ```svelte
  * <script>
  *   import { Button, Card, CardContent } from '$lib/ui';
  * </script>
- * 
+ *
  * <Card>
  *   <CardContent>
  *     <Button>Click Me</Button>
  *   </CardContent>
  * </Card>
  * ```
- * 
+ *
  * @module ui
  */
 
@@ -57,5 +60,8 @@ export {
   Switch,
   Tabs,
   Text,
+  Toast,
+  ToastContainer,
+  ToastService,
   Tooltip
 };

@@ -1,17 +1,17 @@
 /**
  * Component Documentation
- * 
+ *
  * This file provides JSDoc-style documentation for all UI components in the Taste Duel design system.
  * These are exported from `$lib/ui/index.js` and can be imported into any Svelte component.
  */
 
 /**
  * Alert Component
- * 
+ *
  * @component
  * @example
  * <Alert variant="info">This is an informational message</Alert>
- * 
+ *
  * @prop {string} [variant="default"] - Visual style variant: "default", "info", "success", "warning", "error"
  * @prop {string} [title] - Optional title for the alert
  * @prop {boolean} [dismissible=false] - Whether the alert can be dismissed
@@ -21,11 +21,11 @@
 
 /**
  * Badge Component
- * 
+ *
  * @component
  * @example
  * <Badge variant="primary">New</Badge>
- * 
+ *
  * @prop {string} [variant="default"] - Visual style variant: "default", "primary", "secondary", "accent", "outline"
  * @prop {string} [size="default"] - Size variant: "sm", "default", "lg"
  * @prop {string} [className] - Additional CSS classes
@@ -33,24 +33,27 @@
 
 /**
  * Button Component
- * 
+ *
  * @component
  * @example
  * <Button variant="primary" size="lg" on:click={handleClick}>Click Me</Button>
- * 
- * @prop {string} [variant="default"] - Visual style variant: "default", "primary", "secondary", "accent", "outline", "ghost", "link"
- * @prop {string} [size="default"] - Size variant: "sm", "default", "lg"
+ *
+ * @prop {string} [variant="default"] - Visual style variant: "default", "primary", "secondary", "accent", "outline", "ghost", "link", "success", "warning", "error", "info"
+ * @prop {string} [size="default"] - Size variant: "sm", "default", "lg", "icon"
  * @prop {boolean} [disabled=false] - Whether the button is disabled
  * @prop {boolean} [loading=false] - Whether to show a loading state
- * @prop {string} [type="button"] - HTML button type attribute 
+ * @prop {string} [type="button"] - HTML button type attribute
  * @prop {string} [className] - Additional CSS classes
- * @prop {string} [icon] - Optional icon to display
- * @prop {string} [iconPosition="left"] - Position of icon: "left", "right"
+ * @prop {string} [iconLeft] - Optional icon to display on the left
+ * @prop {string} [iconRight] - Optional icon to display on the right
+ * @prop {boolean} [fullWidth=false] - Whether button takes full width
+ * @prop {boolean} [rounded=false] - Whether button has rounded corners
+ * @prop {boolean} [elevated=false] - Whether button has elevation/shadow
  */
 
 /**
  * Card Component
- * 
+ *
  * @component
  * @example
  * <Card>
@@ -64,21 +67,26 @@
  *     <Button>Action</Button>
  *   </CardFooter>
  * </Card>
- * 
- * @prop {string} [variant="default"] - Visual style variant: "default", "outline", "filled", "hover"
+ *
+ * @prop {string} [variant="default"] - Visual style variant: "default", "bordered", "elevated", "interactive"
  * @prop {string} [className] - Additional CSS classes
  * @prop {boolean} [hoverable=false] - Whether card has hover effects
+ * @prop {boolean} [selected=false] - Whether card is in selected state
+ * @prop {boolean} [padding=true] - Whether to apply default padding
+ * @prop {string} [shadow="md"] - Shadow size: "none", "sm", "md", "lg", "xl"
+ * @prop {string} [rounded="lg"] - Border radius: "none", "sm", "md", "lg", "xl", "full"
+ * @prop {boolean} [fullWidth=false] - Whether card takes full width
  */
 
 /**
  * Container Component
- * 
+ *
  * @component
  * @example
  * <Container size="md">
  *   <h1>Page Content</h1>
  * </Container>
- * 
+ *
  * @prop {string} [size="default"] - Size variant: "sm", "default", "md", "lg", "xl", "full"
  * @prop {string} [className] - Additional CSS classes
  * @prop {boolean} [centered=true] - Whether to center the container horizontally
@@ -87,7 +95,7 @@
 
 /**
  * Dialog Component
- * 
+ *
  * @component
  * @example
  * <Dialog bind:open={showDialog} title="Confirmation">
@@ -97,7 +105,7 @@
  *     <Button variant="primary" on:click={handleConfirm}>Confirm</Button>
  *   </svelte:fragment>
  * </Dialog>
- * 
+ *
  * @prop {boolean} [open=false] - Whether the dialog is open
  * @prop {string} [title] - Dialog title
  * @prop {string} [description] - Dialog description
@@ -106,11 +114,17 @@
  * @prop {string} [className] - Additional CSS classes
  * @prop {string} [overlayClassName] - Additional CSS classes for overlay
  * @prop {boolean} [closeOnClickOutside=true] - Whether clicking outside closes the dialog
+ * @prop {string} [portalTarget] - Optional portal target element ID
+ * @prop {string} [position="center"] - Position: "center", "top", "right", "bottom", "left"
+ * @prop {string} [animation="scale"] - Animation type: "scale", "fade", "fly", "slide", "none"
+ * @prop {number} [animationDuration=200] - Animation duration in ms
+ * @prop {boolean} [backdropBlur=true] - Whether to apply backdrop blur
+ * @prop {boolean} [preventScroll=true] - Whether to prevent body scrolling when open
  */
 
 /**
  * Drawer Component
- * 
+ *
  * @component
  * @example
  * <Drawer bind:open={showDrawer} position="right">
@@ -124,7 +138,7 @@
  *     </ul>
  *   </nav>
  * </Drawer>
- * 
+ *
  * @prop {boolean} [open=false] - Whether the drawer is open
  * @prop {string} [position="left"] - Position of drawer: "left", "right", "top", "bottom"
  * @prop {string} [size="default"] - Size variant: "sm", "default", "lg", "xl"
@@ -134,11 +148,11 @@
 
 /**
  * Heading Component
- * 
+ *
  * @component
  * @example
  * <Heading level={2} size="xl">Section Title</Heading>
- * 
+ *
  * @prop {number} [level=1] - HTML heading level (1-6)
  * @prop {string} [size="default"] - Size variant: "xs", "sm", "default", "lg", "xl", "2xl", "3xl"
  * @prop {string} [weight="semibold"] - Font weight: "normal", "medium", "semibold", "bold"
@@ -147,7 +161,7 @@
 
 /**
  * Input Component
- * 
+ *
  * @component
  * @example
  * <Input
@@ -157,7 +171,7 @@
  *   bind:value={username}
  *   error={errors.username}
  * />
- * 
+ *
  * @prop {string} [type="text"] - Input type attribute
  * @prop {string} [value=""] - Input value
  * @prop {string} [placeholder=""] - Input placeholder
@@ -178,11 +192,11 @@
 
 /**
  * Progress Component
- * 
+ *
  * @component
  * @example
  * <Progress value={50} max={100} showLabel />
- * 
+ *
  * @prop {number} [value=0] - Current progress value
  * @prop {number} [max=100] - Maximum progress value
  * @prop {string} [size="default"] - Size variant: "sm", "default", "lg"
@@ -197,7 +211,7 @@
 
 /**
  * Select Component
- * 
+ *
  * @component
  * @example
  * <Select
@@ -207,7 +221,7 @@
  *   valueKey="code"
  *   labelKey="name"
  * />
- * 
+ *
  * @prop {Array} [options=[]] - Array of options to select from
  * @prop {string} [value=""] - Current selected value
  * @prop {string} [placeholder="Select an option"] - Placeholder text
@@ -229,14 +243,14 @@
 
 /**
  * Switch Component
- * 
+ *
  * @component
  * @example
- * <Switch 
+ * <Switch
  *   label="Enable notifications"
  *   bind:checked={notifications}
  * />
- * 
+ *
  * @prop {boolean} [checked=false] - Whether switch is checked
  * @prop {string} [label=""] - Switch label
  * @prop {string} [id=""] - Switch id attribute
@@ -249,7 +263,7 @@
 
 /**
  * Tabs Component
- * 
+ *
  * @component
  * @example
  * <Tabs items={['Account', 'Security', 'Notifications']} bind:activeTab={activeTab}>
@@ -261,7 +275,7 @@
  *     <div>Notification settings...</div>
  *   {/if}
  * </Tabs>
- * 
+ *
  * @prop {Array} [items=[]] - Array of tab names or objects
  * @prop {number} [activeTab=0] - Index of active tab
  * @prop {string} [variant="default"] - Visual style variant: "default", "outline", "pills"
@@ -274,13 +288,13 @@
 
 /**
  * Text Component
- * 
+ *
  * @component
  * @example
  * <Text size="lg" weight="medium" color="muted">
  *   This is some text with custom styling
  * </Text>
- * 
+ *
  * @prop {string} [size="default"] - Size variant: "xs", "sm", "default", "lg", "xl"
  * @prop {string} [weight="normal"] - Font weight: "normal", "medium", "semibold", "bold"
  * @prop {string} [color="default"] - Text color: "default", "muted", "primary", "secondary", "accent"
@@ -291,14 +305,47 @@
  */
 
 /**
+ * Toast Component
+ *
+ * @component
+ * @example
+ * <Toast
+ *   type="success"
+ *   title="Success!"
+ *   message="Operation completed successfully"
+ *   duration={5000}
+ * />
+ *
+ * @prop {string} [type="default"] - Toast type: "default", "success", "error", "warning", "info"
+ * @prop {string} [title=""] - Toast title
+ * @prop {string} [message=""] - Toast message
+ * @prop {number} [duration=5000] - Duration in ms before auto-dismiss (0 for no auto-dismiss)
+ * @prop {string} [position="top-right"] - Position: "top-right", "top-left", "bottom-right", "bottom-left", "top-center", "bottom-center"
+ * @prop {boolean} [dismissible=true] - Whether toast can be dismissed
+ * @prop {string} [icon=null] - Custom icon HTML
+ * @prop {string} [className=""] - Additional CSS classes
+ * @prop {boolean} [showProgress=true] - Whether to show progress bar for auto-dismiss
+ */
+
+/**
+ * ToastContainer Component
+ *
+ * @component
+ * @example
+ * <ToastContainer limit={5} />
+ *
+ * @prop {number} [limit=5] - Maximum number of toasts to show at once
+ */
+
+/**
  * Tooltip Component
- * 
+ *
  * @component
  * @example
  * <Tooltip content="More information about this feature">
  *   <Button>Help</Button>
  * </Tooltip>
- * 
+ *
  * @prop {string} [content=""] - Tooltip content
  * @prop {string} [position="top"] - Tooltip position: "top", "right", "bottom", "left"
  * @prop {string} [trigger="hover"] - Trigger method: "hover", "click", "focus", "manual"

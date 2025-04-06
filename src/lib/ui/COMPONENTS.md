@@ -44,9 +44,9 @@ The Alert component displays important messages to users.
 </Alert>
 
 <!-- Dismissible alert -->
-<Alert 
-  variant="warning" 
-  dismissible 
+<Alert
+  variant="warning"
+  dismissible
   on:dismiss={() => console.log('Alert dismissed')}
 >
   Your session will expire in 5 minutes.
@@ -65,7 +65,7 @@ The Button component provides interactive elements for user actions.
 ```svelte
 <script>
   import { Button } from '$lib/ui';
-  
+
   function handleClick() {
     console.log('Button clicked');
   }
@@ -81,24 +81,34 @@ The Button component provides interactive elements for user actions.
 <Button variant="outline">Outline</Button>
 <Button variant="ghost">Ghost</Button>
 <Button variant="link">Link</Button>
+<Button variant="success">Success</Button>
+<Button variant="warning">Warning</Button>
+<Button variant="error">Error</Button>
+<Button variant="info">Info</Button>
 
 <!-- Sizes -->
 <Button size="sm">Small</Button>
 <Button size="default">Default</Button>
 <Button size="lg">Large</Button>
+<Button size="icon">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14"></path>
+    <path d="M12 5l7 7-7 7"></path>
+  </svg>
+</Button>
 
 <!-- States -->
 <Button disabled>Disabled</Button>
 <Button loading>Loading</Button>
 
-<!-- With icon -->
-<Button>
-  <svg slot="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M5 12h14"></path>
-    <path d="M12 5l7 7-7 7"></path>
-  </svg>
-  Next
-</Button>
+<!-- With icons -->
+<Button iconLeft="check">With Left Icon</Button>
+<Button iconRight="arrow-right">With Right Icon</Button>
+
+<!-- Additional features -->
+<Button rounded>Rounded Button</Button>
+<Button elevated>Elevated Button</Button>
+<Button fullWidth>Full Width Button</Button>
 ```
 
 ### Card
@@ -110,26 +120,64 @@ The Card component is used to group related content.
   import { Card, CardHeader, CardContent, CardFooter, Button, Heading, Text } from '$lib/ui';
 </script>
 
+<!-- Basic usage -->
 <Card>
   <CardHeader>
     <Heading level={3}>Card Title</Heading>
   </CardHeader>
-  
+
   <CardContent>
     <Text>This is the main content of the card. It can contain any elements.</Text>
     <img src="/example.jpg" alt="Example image" />
   </CardContent>
-  
+
   <CardFooter>
     <Button variant="outline">Cancel</Button>
     <Button>Save</Button>
   </CardFooter>
 </Card>
 
-<!-- Hoverable card -->
+<!-- Card variants -->
+<Card variant="bordered">Bordered Card</Card>
+<Card variant="elevated">Elevated Card</Card>
+<Card variant="interactive">Interactive Card</Card>
+
+<!-- Card properties -->
 <Card hoverable on:click={() => console.log('Card clicked')}>
   <CardContent>
     <Text>This card has a hover effect</Text>
+  </CardContent>
+</Card>
+
+<Card selected>
+  <CardContent>
+    <Text>This card is in a selected state</Text>
+  </CardContent>
+</Card>
+
+<Card padding={false}>
+  <img src="/example.jpg" alt="Example image" style="width: 100%;" />
+  <div style="padding: 1rem;">
+    <Heading level={3}>No Padding Card</Heading>
+    <Text>This card has padding disabled for custom layouts</Text>
+  </div>
+</Card>
+
+<Card shadow="lg">
+  <CardContent>
+    <Text>This card has a larger shadow</Text>
+  </CardContent>
+</Card>
+
+<Card rounded="xl">
+  <CardContent>
+    <Text>This card has extra rounded corners</Text>
+  </CardContent>
+</Card>
+
+<Card fullWidth>
+  <CardContent>
+    <Text>This card takes up the full width of its container</Text>
   </CardContent>
 </Card>
 ```
@@ -146,13 +194,17 @@ The Dialog component creates modal dialogs for focused user interactions.
 
 <Button on:click={() => showDialog = true}>Open Dialog</Button>
 
-<Dialog 
+<Dialog
   bind:open={showDialog}
   title="Confirmation"
   description="Please confirm your action"
+  size="md"
+  animation="scale"
+  position="center"
+  backdropBlur={true}
 >
   <p>Are you sure you want to delete this item? This action cannot be undone.</p>
-  
+
   <svelte:fragment slot="footer">
     <Button variant="outline" on:click={() => showDialog = false}>Cancel</Button>
     <Button variant="accent" on:click={() => {
@@ -161,6 +213,91 @@ The Dialog component creates modal dialogs for focused user interactions.
     }}>Delete</Button>
   </svelte:fragment>
 </Dialog>
+```
+
+### Toast
+
+The Toast component displays brief, non-intrusive notifications.
+
+```svelte
+<script>
+  import { Button, ToastContainer, ToastService } from '$lib/ui';
+
+  function showSuccessToast() {
+    ToastService.success({
+      title: 'Success!',
+      message: 'Operation completed successfully',
+      duration: 5000
+    });
+  }
+
+  function showErrorToast() {
+    ToastService.error({
+      title: 'Error!',
+      message: 'Something went wrong',
+      duration: 5000
+    });
+  }
+
+  function showWarningToast() {
+    ToastService.warning({
+      title: 'Warning',
+      message: 'This action might have consequences',
+      duration: 5000
+    });
+  }
+
+  function showInfoToast() {
+    ToastService.info({
+      title: 'Information',
+      message: 'Here is some useful information',
+      duration: 5000
+    });
+  }
+
+  function showCustomToast() {
+    ToastService.add({
+      title: 'Custom Toast',
+      message: 'This is a custom toast with different position',
+      position: 'bottom-center',
+      duration: 5000,
+      dismissible: true,
+      showProgress: true,
+      icon: '<svg>...</svg>' // Custom icon
+    });
+  }
+</script>
+
+<!-- Add the ToastContainer component once in your app -->
+<ToastContainer limit={5} />
+
+<!-- Trigger toasts with buttons -->
+<Button variant="success" on:click={showSuccessToast}>Success Toast</Button>
+<Button variant="error" on:click={showErrorToast}>Error Toast</Button>
+<Button variant="warning" on:click={showWarningToast}>Warning Toast</Button>
+<Button variant="info" on:click={showInfoToast}>Info Toast</Button>
+<Button on:click={showCustomToast}>Custom Toast</Button>
+
+<!-- Programmatic usage in any component -->
+<script>
+  import { ToastService } from '$lib/ui';
+
+  function handleFormSubmit() {
+    // Process form...
+
+    if (success) {
+      ToastService.success({
+        title: 'Form Submitted',
+        message: 'Your form has been submitted successfully'
+      });
+    } else {
+      ToastService.error({
+        title: 'Submission Failed',
+        message: 'Please check your form and try again'
+      });
+    }
+  }
+</script>
 ```
 
 ### Switch
@@ -195,8 +332,8 @@ The Switch component provides a toggle control for binary settings.
 <Switch label="Disabled" disabled />
 
 <!-- Event handling -->
-<Switch 
-  bind:checked={notifications} 
+<Switch
+  bind:checked={notifications}
   label="Enable notifications"
   on:change={({ detail }) => console.log('Notifications:', detail.checked)}
 />
@@ -213,8 +350,8 @@ The Tabs component organizes content into tabbed sections.
   const tabItems = ['Account', 'Security', 'Notifications'];
 </script>
 
-<Tabs 
-  items={tabItems} 
+<Tabs
+  items={tabItems}
   bind:activeTab={activeTab}
 >
   {#if activeTab === 0}
@@ -248,8 +385,8 @@ The Tabs component organizes content into tabbed sections.
   let activeTabId = 'account';
 </script>
 
-<Tabs 
-  items={tabsWithIcons} 
+<Tabs
+  items={tabsWithIcons}
   labelKey="label"
   idKey="id"
   bind:activeTab={activeTabId}
@@ -268,7 +405,7 @@ The Input component provides text input functionality.
   let email = '';
   let password = '';
   let error = '';
-  
+
   function validateEmail() {
     if (!email.includes('@')) {
       error = 'Please enter a valid email address';
@@ -279,14 +416,14 @@ The Input component provides text input functionality.
 </script>
 
 <!-- Basic usage -->
-<Input 
+<Input
   label="Username"
   placeholder="Enter your username"
   bind:value={username}
 />
 
 <!-- With error state -->
-<Input 
+<Input
   type="email"
   label="Email"
   bind:value={email}
@@ -295,7 +432,7 @@ The Input component provides text input functionality.
 />
 
 <!-- With helper text -->
-<Input 
+<Input
   type="password"
   label="Password"
   bind:value={password}
@@ -303,7 +440,7 @@ The Input component provides text input functionality.
 />
 
 <!-- With icon -->
-<Input 
+<Input
   label="Search"
   placeholder="Search..."
   icon="<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'></circle><line x1='21' y1='21' x2='16.65' y2='16.65'></line></svg>"
@@ -328,10 +465,10 @@ The Select component provides a dropdown selection.
 ```svelte
 <script>
   import { Select } from '$lib/ui';
-  
+
   let selectedLanguage = '';
   const languages = ['JavaScript', 'TypeScript', 'Python', 'Rust', 'Go'];
-  
+
   let selectedCountry = '';
   const countries = [
     { code: 'us', name: 'United States' },
@@ -389,44 +526,40 @@ Components can be combined to create complex interfaces:
 
 ```svelte
 <script>
-  import { Card, CardHeader, CardContent, CardFooter, Heading, Text, Input, Button, Alert } from '$lib/ui';
-  
+  import { Card, CardHeader, CardContent, CardFooter, Heading, Text, Input, Button, Alert, ToastService } from '$lib/ui';
+
   let email = '';
   let password = '';
   let error = '';
-  let success = false;
-  
+
   function handleSubmit() {
     if (!email || !password) {
       error = 'Please fill in all fields';
-      success = false;
       return;
     }
-    
+
     // Submit logic here
-    success = true;
+    ToastService.success({
+      title: 'Login Successful',
+      message: 'Welcome back! Redirecting to dashboard...'
+    });
+
     error = '';
   }
 </script>
 
-<Card className="login-card">
+<Card className="login-card" variant="bordered" shadow="md">
   <CardHeader>
     <Heading level={2}>Login</Heading>
   </CardHeader>
-  
+
   <CardContent>
     {#if error}
       <Alert variant="error" dismissible on:dismiss={() => error = ''}>
         {error}
       </Alert>
     {/if}
-    
-    {#if success}
-      <Alert variant="success">
-        Login successful! Redirecting...
-      </Alert>
-    {/if}
-    
+
     <form on:submit|preventDefault={handleSubmit}>
       <Input
         label="Email"
@@ -435,7 +568,7 @@ Components can be combined to create complex interfaces:
         bind:value={email}
         fullWidth
       />
-      
+
       <Input
         label="Password"
         type="password"
@@ -445,10 +578,10 @@ Components can be combined to create complex interfaces:
       />
     </form>
   </CardContent>
-  
+
   <CardFooter>
     <Button variant="outline">Register</Button>
-    <Button on:click={handleSubmit}>Login</Button>
+    <Button on:click={handleSubmit} loading={isLoading}>Login</Button>
   </CardFooter>
 </Card>
 
@@ -478,27 +611,34 @@ All components accept a `className` prop for custom styling:
 
 <style>
   :global(.my-custom-button) {
-    background-image: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-    border-radius: 9999px;
+    background-image: linear-gradient(to right, var(--primary-500), var(--secondary-500));
+    border-radius: var(--radius-full);
   }
 </style>
 ```
 
-For more detailed styling, use CSS variables in your global styles:
+For more detailed styling, use CSS variables from the theme.css file:
 
 ```css
+/* Override theme variables in your global CSS */
 :root {
-  --primary-color: #8b5cf6;
-  --primary-hover: #a78bfa;
-  --card-bg: #1f2937;
+  --primary-500: #8b5cf6;
+  --secondary-500: #6366f1;
+  --accent-500: #f43f5e;
+  --card-bg: var(--neutral-800);
+  --text-color: var(--neutral-50);
 }
 ```
 
 ## Best Practices
 
-- Use appropriate feedback components (Alert, Progress) to keep users informed
+- Use appropriate feedback components (Alert, Toast, Progress) to keep users informed
 - Group related form controls together logically
 - Utilize consistent spacing between components
 - Provide clear error messages and validation
 - Consider keyboard navigation in your component usage
 - Test all components in both light and dark themes
+- Use the appropriate variant for the context (e.g., success buttons for positive actions)
+- Implement loading states for asynchronous operations
+- Ensure proper contrast ratios for accessibility
+- Use Toast notifications for non-disruptive feedback
