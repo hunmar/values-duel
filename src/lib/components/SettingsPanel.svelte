@@ -27,10 +27,10 @@
   
   // Tabs configuration
   const tabs = [
-    { id: 'general', label: 'General' },
-    { id: 'algorithm', label: 'Algorithm' },
-    { id: 'appearance', label: 'Appearance' },
-    { id: 'accessibility', label: 'Accessibility' }
+    { label: 'General' },
+    { label: 'Algorithm' },
+    { label: 'Appearance' },
+    { label: 'Accessibility' }
   ];
   
   // Get current settings from appState store
@@ -177,7 +177,7 @@
   size="lg"
   className="settings-dialog"
 >
-  <Tabs bind:selected={tabIndex} tabs={tabs}>
+  <Tabs items={tabs} bind:activeTab={tabIndex} variant="pills">
     {#if tabIndex === 0}
       <!-- General Settings -->
       <div class="settings-group" transition:fade={{ duration: 150 }}>
