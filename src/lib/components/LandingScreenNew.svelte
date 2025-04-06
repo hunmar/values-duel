@@ -365,7 +365,6 @@
     background-color: rgba(99, 102, 241, 0.2);
     transform: rotate(30deg);
   }
-  }
   
   .landing-header {
     text-align: center;
