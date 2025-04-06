@@ -451,7 +451,7 @@
     transition: transform 0.3s ease;
   }
   
-  .food-preview-card:hover .food-image img {
+  :global(.food-preview-card:hover) .food-image img {
     transform: scale(1.1);
   }
   
@@ -499,7 +499,7 @@
     flex-shrink: 0;
   }
   
-  .elo-note {
+  :global(.elo-note) {
     margin-top: 1rem;
     font-style: italic;
   }
@@ -510,7 +510,7 @@
     margin: 1.5rem 0 1rem;
   }
   
-  .import-button {
+  :global(.import-button) {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -520,7 +520,7 @@
     font-size: 1.2rem;
   }
   
-  .import-error {
+  :global(.import-error) {
     color: var(--accent-color);
     margin-top: 0.5rem;
     font-size: 0.875rem;
@@ -537,13 +537,13 @@
     margin-bottom: 0.75rem;
   }
   
-  .start-button {
+  :global(.start-button) {
     font-size: 1.25rem;
     padding: 0.75rem 2.5rem;
     font-weight: 600;
   }
   
-  .demo-button {
+  :global(.demo-button) {
     font-size: 1.25rem;
     padding: 0.75rem 2rem;
   }
