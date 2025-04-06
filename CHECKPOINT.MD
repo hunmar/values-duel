@@ -271,6 +271,16 @@
   - Add custom category creation for imported food lists
   - Enhance analytics with cross-category comparison insights
 
+### April 28, 2025 (Planned)
+- Implement adaptive comparison algorithm (2.4.2, 2.4.3, 11.1)
+  - Enhance selection algorithm to prioritize closely rated items
+  - Add machine learning component to predict potential preferences
+  - Reduce total required comparisons through smart selection
+  - Add confidence score for generated rankings
+  - Create visual representation of algorithm decisions
+  - Implement comparison history optimization
+  - Add detailed explanation of ranking confidence
+
 ### Development Notes
 - Component organization: Keep all UI components in src/lib/ui and domain-specific components in src/lib/components
 - Variable naming: Continue using camelCase for variables, PascalCase for components
