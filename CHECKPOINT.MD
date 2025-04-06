@@ -190,6 +190,17 @@
   - Identified potential performance optimizations
   - Planned accessibility audit and improvements
 
+### April 20, 2025
+- Enhanced Comparison Screen with live ratings display (5.2.2, 5.3.1, 6.1, 6.5)
+  - Implemented live ratings leaderboard showing all items' current rankings
+  - Added real-time animation effects when ratings change
+  - Integrated item photos with hover effects and error handling
+  - Enhanced display of current vs. total comparisons with visual counter
+  - Added gradient styling and micro-interactions for better user feedback
+  - Fixed CSS selector warnings with proper Svelte scoped styles
+  - Improved GitHub Pages deployment configuration
+  - Enhanced comparison info section with animated loading indicators
+
 ## Product Vision
 "Taste Duel" is a Svelte-based web application that helps users discover their true food preferences through an engaging series of direct comparisons. Using the Elo rating system (commonly used in chess rankings), the app presents users with pairs of food items and asks them to choose which they prefer. After completing all necessary comparisons, users receive a comprehensive ranked list of their food preferences, providing insights into their taste preferences that may not be immediately obvious through self-assessment.
 
