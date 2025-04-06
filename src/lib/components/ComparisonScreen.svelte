@@ -3,9 +3,9 @@
   import { APP_STATES } from '../stores/appState.js';
   import appState from '../stores/appState.js';
   import foodItems from '../stores/foodItems.js';
-  import { selectComparisonPair, updateRatings } from '../utils/eloRating.js';
+  import { selectComparisonPair, updateRatings, sortItemsByRating } from '../utils/eloRating.js';
   import FoodCard from './FoodCard.svelte';
-  import { Progress } from '../ui';
+  import { Progress, Badge } from '../ui';
   
   let foodList = [];
   let currentState = {};
@@ -16,6 +16,8 @@
   let timerId = null;
   let leftCardEl;
   let rightCardEl;
+  let sortedFoodItems = [];
+  let updatedRatings = {};
   
   // Subscribe to stores
   // Handle keyboard navigation
@@ -75,6 +77,9 @@
     // Then subscribe to food items
     const unsubscribeFoodItems = foodItems.subscribe(items => {
       foodList = items;
+      
+      // Sort items by rating for the live leaderboard
+      sortedFoodItems = sortItemsByRating(items);
       
       // If we already have the app state and valid food list but no items selected yet, select them
       if (currentState && !itemA && !itemB && foodList && foodList.length >= 2) {
@@ -146,6 +151,12 @@
     const actualOutcomeA = winningItem.id === itemA.id ? 1 : 0;
     const { newRatingA, newRatingB } = updateRatings(itemA.rating, itemB.rating, actualOutcomeA);
     
+    // Store the updated ratings for animation
+    updatedRatings = {
+      [itemA.id]: { oldRating: itemA.rating, newRating: newRatingA },
+      [itemB.id]: { oldRating: itemB.rating, newRating: newRatingB }
+    };
+    
     // Add animation class to show selection feedback
     const comparisonCards = document.querySelector('.comparison-cards');
     if (comparisonCards) {
@@ -161,17 +172,46 @@
       selectedCardElement.classList.add('winner-selected');
     }
     
-    // Update food items in the store with new ratings
-    foodItems.update(items => {
-      return items.map(item => {
-        if (item.id === itemA.id) {
-          return { ...item, rating: newRatingA };
-        } else if (item.id === itemB.id) {
-          return { ...item, rating: newRatingB };
-        }
-        return item;
+    // Get rating display elements to create a more dramatic effect
+    const leftRatingEl = document.querySelector('.card-wrapper:first-child .rating-display');
+    const rightRatingEl = document.querySelector('.card-wrapper:last-child .rating-display');
+    
+    // Create a smoother transition for ratings
+    setTimeout(() => {
+      // Update food items in the store with new ratings
+      foodItems.update(items => {
+        return items.map(item => {
+          if (item.id === itemA.id) {
+            return { ...item, rating: newRatingA };
+          } else if (item.id === itemB.id) {
+            return { ...item, rating: newRatingB };
+          }
+          return item;
+        });
       });
-    });
+      
+      // Manually add animation class to rating displays for better visual effect
+      if (winningItem.id === itemA.id && leftRatingEl) {
+        leftRatingEl.classList.add('updating');
+      } else if (winningItem.id === itemB.id && rightRatingEl) {
+        rightRatingEl.classList.add('updating');
+      }
+      
+      // Add animation class to the loser's rating display as well after a short delay
+      setTimeout(() => {
+        if (losingItem.id === itemA.id && leftRatingEl) {
+          leftRatingEl.classList.add('updating');
+        } else if (losingItem.id === itemB.id && rightRatingEl) {
+          rightRatingEl.classList.add('updating');
+        }
+      }, 200);
+      
+      // Remove animation classes after animation completes
+      setTimeout(() => {
+        leftRatingEl?.classList.remove('updating');
+        rightRatingEl?.classList.remove('updating');
+      }, 1500);
+    }, 500); // Delay the rating update for a better visual sequence
     
     // Add to comparison history
     appState.update(state => {
@@ -199,6 +239,14 @@
         const comparisonCards = document.querySelector('.comparison-cards');
         comparisonCards?.classList.remove('choice-made');
         document.querySelector('.winner-selected')?.classList.remove('winner-selected');
+        
+        // Make sure rating animation classes are removed
+        document.querySelectorAll('.rating-display.updating').forEach(el => {
+          el.classList.remove('updating');
+        });
+        
+        // Clear updated ratings after animation completes
+        updatedRatings = {};
         
         if (nextState === APP_STATES.COMPARISON) {
           // Add transition-out class for smooth transition between pairs
@@ -262,6 +310,9 @@
           keyboardAccessible={true}
         />
         <div class="keyboard-hint" aria-hidden="true">← Left Arrow</div>
+        <div class="rating-display" class:updating={selectedItem && selectedItem.id === itemA.id}>
+          Rating: {itemA.rating}
+        </div>
       </div>
       
       <div class="vs-indicator" aria-hidden="true">
@@ -279,16 +330,72 @@
           keyboardAccessible={true}
         />
         <div class="keyboard-hint" aria-hidden="true">Right Arrow →</div>
+        <div class="rating-display" class:updating={selectedItem && selectedItem.id === itemB.id}>
+          Rating: {itemB.rating}
+        </div>
       </div>
     {/if}
   </div>
   
-  <div class="comparison-info">
-    {#if typeof currentState.completedComparisons === 'number' && typeof currentState.totalComparisons === 'number'}
-      <p>Comparison {currentState.completedComparisons + 1} of {currentState.totalComparisons}</p>
-    {:else}
-      <p>Loading comparison...</p>
-    {/if}
+  <div class="comparison-info-container">
+    <div class="comparison-info">
+      {#if typeof currentState.completedComparisons === 'number' && typeof currentState.totalComparisons === 'number'}
+        <div class="comparison-count">
+          <span class="current-comparison">{currentState.completedComparisons + 1}</span>
+          <span class="comparison-separator">/</span>
+          <span class="total-comparisons">{currentState.totalComparisons}</span>
+        </div>
+        <div class="comparison-label">Comparisons completed</div>
+      {:else}
+        <div class="loading-indicator">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+        <div class="comparison-label">Loading comparisons...</div>
+      {/if}
+    </div>
+  </div>
+  
+  <!-- Live Ratings Leaderboard -->
+  <div class="live-ratings-container">
+    <h2>Live Ratings</h2>
+    <div class="ratings-grid">
+      {#each sortedFoodItems as food, index}
+        <div class="rating-item" class:rating-updating={updatedRatings[food.id]}>
+          <div class="rating-rank">#{index + 1}</div>
+          <div class="rating-image">
+            <img 
+              src={food.imageUrl} 
+              alt={food.name}
+              on:error={(e) => {
+                // Use fallback image if the main image fails to load
+                if (food.fallbackImageUrl) {
+                  e.target.src = food.fallbackImageUrl;
+                }
+              }}
+            />
+          </div>
+          <div class="rating-info">
+            <div class="rating-name">{food.name}</div>
+            <div class="rating-value" class:increasing={updatedRatings[food.id] && updatedRatings[food.id].newRating > updatedRatings[food.id].oldRating} class:decreasing={updatedRatings[food.id] && updatedRatings[food.id].newRating < updatedRatings[food.id].oldRating}>
+              <span class="rating-number">{food.rating}</span>
+              {#if updatedRatings[food.id]}
+                <span class="rating-change">
+                  {#if updatedRatings[food.id].newRating > updatedRatings[food.id].oldRating}
+                    <span class="rating-arrow up">↑</span>
+                    <span class="rating-delta">+{updatedRatings[food.id].newRating - updatedRatings[food.id].oldRating}</span>
+                  {:else if updatedRatings[food.id].newRating < updatedRatings[food.id].oldRating}
+                    <span class="rating-arrow down">↓</span>
+                    <span class="rating-delta">-{updatedRatings[food.id].oldRating - updatedRatings[food.id].newRating}</span>
+                  {/if}
+                </span>
+              {/if}
+            </div>
+          </div>
+        </div>
+      {/each}
+    </div>
   </div>
 </div>
 
@@ -422,20 +529,104 @@
     border: 1px solid var(--card-border);
   }
   
+  .comparison-info-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+  
   .comparison-info {
     text-align: center;
-    margin-top: 2.5rem;
-    font-size: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(17, 24, 39, 0.7);
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .comparison-info::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 3px;
+    width: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    z-index: 1;
+  }
+  
+  .comparison-count {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .current-comparison {
+    color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+  }
+  
+  .comparison-separator {
+    opacity: 0.5;
+    font-weight: 400;
+  }
+  
+  .comparison-label {
+    font-size: 0.9rem;
     color: var(--muted-color);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     font-weight: 500;
-    background-color: rgba(99, 102, 241, 0.1);
+  }
+  
+  .loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    height: 1.8rem;
+  }
+  
+  .dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
     display: inline-block;
-    padding: 0.5rem 1.2rem;
-    border-radius: 8px;
-    margin-left: auto;
-    margin-right: auto;
-    border: 1px solid var(--card-border);
-    box-shadow: var(--shadow-sm);
+    animation: dot-pulse 1.4s infinite ease-in-out;
+  }
+  
+  .dot:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+  
+  .dot:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+  
+  @keyframes dot-pulse {
+    0%, 80%, 100% { 
+      transform: scale(0);
+      opacity: 0.5;
+    }
+    40% { 
+      transform: scale(1);
+      opacity: 1;
+    }
   }
   
   @media (max-width: 768px) {
@@ -450,24 +641,31 @@
     h1 {
       font-size: 2rem;
     }
+    
+    .rating-display {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+    }
   }
   
-  /* Animation styles */
-  .comparison-cards.choice-made .food-card:not(.winner-selected) {
+  /* Animation styles - these classes are applied through JavaScript DOM manipulation */
+  /* Keep these since they're used dynamically via classList.add/remove */
+  :global(.comparison-cards.choice-made .food-card:not(.winner-selected)) {
     opacity: 0.4;
     transform: scale(0.94);
     filter: grayscale(0.5);
     border-color: var(--card-border);
   }
   
-  .food-card.winner-selected {
+  :global(.food-card.winner-selected) {
     transform: scale(1.05) translateY(-15px);
     box-shadow: var(--shadow-xl), 0 0 20px rgba(16, 185, 129, 0.3);
     z-index: 10;
     border-color: var(--card-selected-border);
   }
   
-  .food-card.winner-selected::after {
+  :global(.food-card.winner-selected::after) {
     content: "✓";
     position: absolute;
     top: -15px;
@@ -492,15 +690,306 @@
     100% { transform: scale(1); }
   }
   
-  .comparison-cards.transition-out {
+  @keyframes ratingUpdate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); color: var(--primary-color); }
+    100% { transform: scale(1); }
+  }
+  
+  :global(.comparison-cards.transition-out) {
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
-  .comparison-cards.transition-in {
+  :global(.comparison-cards.transition-in) {
     opacity: 1;
     transform: translateY(0);
     transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .rating-display {
+    position: relative;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+  }
+  
+  .rating-display::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(16, 185, 129, 0.2));
+    border-radius: 8px;
+    z-index: -1;
+    opacity: 0.5;
+  }
+  
+  .rating-display.updating {
+    animation: ratingUpdate 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4), var(--shadow-md);
+  }
+  
+  /* Live Ratings Styles */
+  .live-ratings-container {
+    margin-top: 3rem;
+    background: rgba(17, 24, 39, 0.7);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .live-ratings-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    z-index: 1;
+  }
+  
+  .live-ratings-container h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+  
+  .live-ratings-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 3px;
+  }
+  
+  .ratings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .rating-item {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .rating-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.1));
+    z-index: -1;
+    opacity: 0.5;
+  }
+  
+  .rating-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--card-hover-border);
+    background: rgba(30, 41, 59, 0.95);
+  }
+  
+  .rating-updating {
+    animation: ratingItemUpdate 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5), var(--shadow-md);
+    z-index: 10;
+  }
+  
+  .rating-updating::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(16, 185, 129, 0.3));
+    z-index: -1;
+    animation: glowPulse 1.5s ease-in-out;
+  }
+  
+  @keyframes ratingItemUpdate {
+    0% { transform: translateY(0); }
+    20% { transform: translateY(-8px); }
+    40% { transform: translateY(0); }
+    60% { transform: translateY(-5px); }
+    80% { transform: translateY(0); }
+    100% { transform: translateY(0); }
+  }
+  
+  @keyframes glowPulse {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  
+  .rating-rank {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 50%;
+    font-weight: bold;
+    color: white;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+  }
+  
+  .rating-image {
+    width: 50px;
+    height: 50px;
+    overflow: hidden;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .rating-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.7), transparent);
+    z-index: 1;
+  }
+  
+  .rating-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .rating-item:hover .rating-image img {
+    transform: scale(1.1);
+  }
+  
+  .rating-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .rating-name {
+    font-weight: 600;
+    color: white;
+    font-size: 1rem;
+  }
+  
+  .rating-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--muted-color);
+  }
+  
+  .rating-number {
+    font-weight: 500;
+  }
+  
+  .rating-change {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .rating-arrow {
+    font-weight: bold;
+  }
+  
+  .rating-arrow.up {
+    color: #10b981; /* green */
+  }
+  
+  .rating-arrow.down {
+    color: #ef4444; /* red */
+  }
+  
+  .rating-delta {
+    font-weight: 500;
+  }
+  
+  .increasing .rating-number {
+    animation: pulseGreen 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #10b981;
+  }
+  
+  .decreasing .rating-number {
+    animation: pulseRed 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #ef4444;
+  }
+  
+  @keyframes pulseGreen {
+    0% { color: var(--muted-color); }
+    50% { color: #10b981; }
+    100% { color: var(--muted-color); }
+  }
+  
+  @keyframes pulseRed {
+    0% { color: var(--muted-color); }
+    50% { color: #ef4444; }
+    100% { color: var(--muted-color); }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @media (max-width: 768px) {
+    .ratings-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .live-ratings-container {
+      padding: 1rem;
+    }
+    
+    .live-ratings-container h2 {
+      font-size: 1.5rem;
+    }
   }
 </style>

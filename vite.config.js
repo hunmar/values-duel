@@ -4,5 +4,5 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [svelte()],
-  base: '/values-duel/', // Add base path for GitHub Pages
+  base: '/values-duel/', // Use repository name for GitHub Pages
 })

@@ -386,7 +386,7 @@
     margin-bottom: 0.25rem;
   }
   
-  .rating-value {
+  :global(.rating-value) {
     font-size: 0.875rem;
     opacity: 0.8;
   }
@@ -437,7 +437,7 @@
     padding-right: 1rem;
   }
   
-  .rank-badge {
+  :global(.rank-badge) {
     min-width: 2.5rem;
     display: flex;
     justify-content: center;
@@ -467,12 +467,12 @@
     flex: 1;
   }
   
-  .food-name {
+  :global(.food-name) {
     font-weight: 600;
     margin-bottom: 0.25rem;
   }
   
-  .food-description {
+  :global(.food-description) {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -499,7 +499,7 @@
     margin-bottom: 0.25rem;
   }
   
-  .score {
+  :global(.score) {
     font-weight: 600;
     font-size: 0.875rem;
   }
@@ -511,7 +511,7 @@
     margin-top: 1.5rem;
   }
   
-  .action-button {
+  :global(.action-button) {
     width: 100%;
   }
   
@@ -531,11 +531,11 @@
     font-size: 0.875rem;
   }
   
-  .copy-button {
+  :global(.copy-button) {
     min-width: 80px;
   }
   
-  .social-label {
+  :global(.social-label) {
     margin-bottom: 0.75rem;
   }
   

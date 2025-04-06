@@ -239,7 +239,8 @@
 </Container>
 
 <style>
-  .landing-container {
+  /* Use :global for class that is applied via className prop */
+  :global(.landing-container) {
     padding-top: 3rem;
     padding-bottom: 3rem;
   }
@@ -271,7 +272,8 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
   
-  .app-title {
+  /* Use :global for classes that are applied via className prop */
+  :global(.app-title) {
     font-size: 3.5rem;
     margin-bottom: 0.75rem;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -281,7 +283,7 @@
     text-fill-color: transparent;
   }
   
-  .app-subtitle {
+  :global(.app-subtitle) {
     font-size: 1.25rem;
     max-width: 600px;
   }
@@ -306,13 +308,13 @@
     gap: 1rem;
   }
   
-  .food-preview-card {
+  :global(.food-preview-card) {
     transition: all 0.2s ease;
     overflow: hidden;
     height: 160px;
   }
   
-  .food-preview-card:hover {
+  :global(.food-preview-card:hover) {
     transform: translateY(-5px);
   }
   
@@ -332,12 +334,12 @@
     transform: scale(1.1);
   }
   
-  .food-name-container {
+  :global(.food-name-container) {
     padding: 0.5rem !important;
     text-align: center;
   }
   
-  .food-name {
+  :global(.food-name) {
     font-size: 0.875rem;
     font-weight: 500;
     white-space: nowrap;
