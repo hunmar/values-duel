@@ -4,7 +4,7 @@
   import appState from '../stores/appState.js';
   import foodItems from '../stores/foodItems.js';
   import { calculateMinComparisons, updateRatings } from '../utils/eloRating.js';
-  import { Container, Heading, Text, Button, Card, CardContent, Badge } from '../ui';
+  import { Container, Heading, Text, Button, Card, CardContent, Badge, Dialog } from '../ui';
   let foodList = [];
   let importError = null;
   let showFormatInfo = false;
@@ -293,16 +293,16 @@
     </Text>
   </div>
   
-  {#if showFormatInfo}
-    <div class="format-overlay">
-      <div class="format-modal">
-        <Card className="format-card">
-          <CardContent>
-            <div class="format-header">
-              <Heading level={3} size="h3">Required JSON Format</Heading>
-              <button class="close-button" on:click={() => showFormatInfo = false}>×</button>
-            </div>
-            <pre class="format-code">{`[
+  <Dialog
+    open={showFormatInfo}
+    title="Required JSON Format"
+    on:close={() => showFormatInfo = false}
+    size="md"
+    className="format-dialog"
+  >
+    <Card className="format-card">
+      <CardContent>
+    <pre class="format-code">{`[
   {
     "id": 1,
     "name": "Item Name",
@@ -312,13 +312,10 @@
   },
   ...
 ]`}</pre>
-            <Text>Each item must include id, name, description, imageUrl, and rating (start with 1200).</Text>
-            <Button on:click={() => showFormatInfo = false}>Close</Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  {/if}
+    <Text>Each item must include id, name, description, imageUrl, and rating (start with 1200).</Text>
+      </CardContent>
+    </Card>
+  </Dialog>
 </Container>
 
 <style>
