@@ -10,6 +10,7 @@ Taste Duel uses the Elo rating system (commonly used in chess rankings) to accur
 
 - **Elo Rating System**: Sophisticated algorithm for accurate preference ranking
 - **Adaptive Comparison Selection**: Minimizes the number of comparisons needed for accurate results
+- **Enhanced Design System**: Consistent, accessible, and beautiful UI components
 - **Responsive Design**: Works on all device sizes
 - **Local Storage**: Save progress between sessions
 - **Export Results**: Save your rankings as JSON
@@ -45,6 +46,16 @@ Taste Duel uses the Elo rating system (commonly used in chess rankings) to accur
 - Subsequent comparisons prioritize items with similar ratings for more accurate differentiation
 - Adaptive algorithm reduces total comparisons needed while maintaining ranking accuracy
 - Minimum of log₂(n) × n comparisons required for n items
+
+### Design System
+
+The application uses a comprehensive design system that ensures consistency across all components:
+
+- **Color System**: Consistent color palette with primary, secondary, and accent colors
+- **Typography**: Hierarchical type system with defined sizes, weights, and line heights
+- **Spacing**: Standardized spacing scale for consistent layout and component spacing
+- **Components**: Reusable UI components with consistent styling and behavior
+- **Accessibility**: WCAG 2.1 AA compliant components with proper contrast and keyboard navigation
 
 ## Getting Started
 
@@ -86,6 +97,7 @@ npm run build
     - `/components` - Svelte components
     - `/stores` - Svelte stores for state management
     - `/utils` - Utility functions
+    - `/ui` - Design system components
   - `App.svelte` - Main application component
   - `main.js` - Application entry point
 

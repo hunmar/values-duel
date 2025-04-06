@@ -1,4 +1,15 @@
 <script lang="ts">
+  import { Badge } from '../ui';
+  import { getCategoryColor, FOOD_CATEGORIES } from '../stores/foodItems.js';
+
+  interface Category {
+    cuisine?: string;
+    type?: string;
+    dietary?: string | string[];
+    ingredient?: string | string[];
+    cookingMethod?: string;
+  }
+
   interface FoodItem {
     id: number;
     name: string;
@@ -6,12 +17,14 @@
     imageUrl: string;
     fallbackImageUrl?: string;
     rating: number;
+    categories?: Category;
   }
 
   export let food: FoodItem = {} as FoodItem;
   export let onClick: (food: FoodItem) => void = () => {};
   export let selected = false;
   export let keyboardAccessible = false;
+  export let showCategories = true;
 
   // Handle keyboard interaction and click for better accessibility
   function handleInteraction() {
@@ -19,10 +32,99 @@
       onClick(food);
     }
   }
+
+  // Helper function to get primary category for display
+  function getPrimaryCategory() {
+    if (!food.categories) return null;
+
+    // Priority order: cuisine, type, dietary, cookingMethod
+    if (food.categories.cuisine) {
+      return {
+        name: food.categories.cuisine,
+        color: getCategoryColor(food.categories.cuisine)
+      };
+    } else if (food.categories.type) {
+      return {
+        name: food.categories.type,
+        color: getCategoryColor(food.categories.type)
+      };
+    } else if (food.categories.dietary && Array.isArray(food.categories.dietary) && food.categories.dietary.length > 0) {
+      return {
+        name: food.categories.dietary[0],
+        color: getCategoryColor(food.categories.dietary[0])
+      };
+    } else if (food.categories.dietary && !Array.isArray(food.categories.dietary)) {
+      return {
+        name: food.categories.dietary,
+        color: getCategoryColor(food.categories.dietary)
+      };
+    } else if (food.categories.cookingMethod) {
+      return {
+        name: food.categories.cookingMethod,
+        color: getCategoryColor(food.categories.cookingMethod)
+      };
+    }
+
+    return null;
+  }
+
+  // Get all categories for display
+  function getAllCategories() {
+    if (!food.categories) return [];
+
+    const categories = [];
+
+    // Add cuisine
+    if (food.categories.cuisine) {
+      categories.push({
+        name: food.categories.cuisine,
+        color: getCategoryColor(food.categories.cuisine),
+        type: 'cuisine'
+      });
+    }
+
+    // Add type
+    if (food.categories.type) {
+      categories.push({
+        name: food.categories.type,
+        color: getCategoryColor(food.categories.type),
+        type: 'type'
+      });
+    }
+
+    // Add dietary restrictions
+    if (food.categories.dietary) {
+      const dietaryItems = Array.isArray(food.categories.dietary)
+        ? food.categories.dietary
+        : [food.categories.dietary];
+
+      dietaryItems.forEach(item => {
+        categories.push({
+          name: item,
+          color: getCategoryColor(item),
+          type: 'dietary'
+        });
+      });
+    }
+
+    // Add cooking method
+    if (food.categories.cookingMethod) {
+      categories.push({
+        name: food.categories.cookingMethod,
+        color: getCategoryColor(food.categories.cookingMethod),
+        type: 'cooking'
+      });
+    }
+
+    return categories;
+  }
+
+  const primaryCategory = getPrimaryCategory();
+  const allCategories = getAllCategories();
 </script>
 
-<div 
-  class="food-card {selected ? 'selected' : ''} {keyboardAccessible ? 'keyboard-accessible' : ''}" 
+<div
+  class="food-card {selected ? 'selected' : ''} {keyboardAccessible ? 'keyboard-accessible' : ''}"
   on:click={handleInteraction}
   on:keydown={(e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -36,8 +138,8 @@
   aria-label="Choose {food.name}"
 >
   <div class="food-image">
-    <img 
-      src={food.imageUrl} 
+    <img
+      src={food.imageUrl}
       alt={food.name}
       on:error={(e) => {
         // Use fallback image if the main image fails to load
@@ -50,6 +152,34 @@
   <div class="food-info">
     <h3>{food.name}</h3>
     <p>{food.description}</p>
+
+    {#if showCategories && food.categories}
+      <div class="category-indicators">
+        {#if primaryCategory}
+          <div class="primary-category" style="background-color: {primaryCategory.color}">
+            {primaryCategory.name}
+          </div>
+        {/if}
+
+        <div class="category-badges">
+          {#each allCategories as category, i}
+            {#if i < 3} <!-- Limit to 3 badges to avoid overcrowding -->
+              <Badge
+                variant="outline"
+                className="category-badge"
+                style="border-color: {category.color}; color: {category.color};"
+              >
+                {category.name}
+              </Badge>
+            {/if}
+          {/each}
+
+          {#if allCategories.length > 3}
+            <Badge variant="outline" className="more-badge">+{allCategories.length - 3}</Badge>
+          {/if}
+        </div>
+      </div>
+    {/if}
   </div>
 </div>
 
@@ -78,9 +208,9 @@
     position: absolute;
     inset: 0;
     border-radius: 12px;
-    background: linear-gradient(to bottom, 
-      rgba(255, 255, 255, 0.03), 
-      rgba(255, 255, 255, 0.03) 30%, 
+    background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.03) 30%,
       transparent);
     z-index: -1;
     opacity: 0;
@@ -169,12 +299,12 @@
     box-shadow: 0 0 0 3px var(--focus-ring), var(--shadow-md);
     border-color: var(--secondary-color);
   }
-  
+
   .food-card.keyboard-accessible:focus {
     transform: translateY(-10px);
     box-shadow: var(--shadow-lg), 0 0 0 3px var(--focus-ring);
   }
-  
+
   /* Add a visual indicator for keyboard access */
   .food-card.keyboard-accessible:focus::after {
     content: "";
@@ -189,13 +319,13 @@
     z-index: 10;
     box-shadow: var(--shadow-md);
   }
-  
+
   @keyframes pulse {
     0% { transform: scale(0.95); opacity: 0.8; }
     50% { transform: scale(1.05); opacity: 1; }
     100% { transform: scale(0.95); opacity: 0.8; }
   }
-  
+
   /* Add subtle highlight effect on card selection */
   .food-card.selected::after {
     content: "";
@@ -206,5 +336,43 @@
     height: 4px;
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
     z-index: 5;
+  }
+  /* Category styling */
+  .category-indicators {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .primary-category {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    align-self: flex-start;
+  }
+
+  .category-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  :global(.category-badge) {
+    font-size: 0.7rem !important;
+    padding: 2px 6px !important;
+    height: auto !important;
+    font-weight: 500 !important;
+  }
+
+  :global(.more-badge) {
+    font-size: 0.7rem !important;
+    padding: 2px 6px !important;
+    height: auto !important;
+    background-color: rgba(255, 255, 255, 0.1);
   }
 </style>

@@ -22,7 +22,21 @@ const initialState = {
   comparisonHistory: [],
   theme: THEMES.DARK,
   isDemoMode: false,
-  
+
+  // Category filtering
+  selectedCategories: {
+    cuisine: [],
+    type: [],
+    dietary: [],
+    ingredient: [],
+    cookingMethod: []
+  },
+  showCategoryFilters: false,  // Controls whether category filters are visible
+
+  // Comparison algorithm settings
+  confidenceThreshold: 0.75,   // Threshold for confidence in rankings (0-1)
+  prioritizeCloseRatings: true, // Whether to prioritize comparing items with close ratings
+
   // New settings properties
   kFactor: 32,                 // Elo rating K-factor (how drastically ratings change)
   sound: true,                 // Enable sound effects
@@ -53,14 +67,14 @@ export function applyAccessibilityPreferences(preferences) {
     } else {
       document.documentElement.classList.remove('reduced-motion');
     }
-    
+
     // Apply high contrast preference
     if (preferences.highContrast) {
       document.documentElement.classList.add('high-contrast');
     } else {
       document.documentElement.classList.remove('high-contrast');
     }
-    
+
     // Apply font size preference
     document.documentElement.setAttribute('data-font-size', preferences.fontSize || 'default');
   }

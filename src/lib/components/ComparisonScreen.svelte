@@ -236,8 +236,6 @@
     }
   }
 
-  // Function removed as part of algorithm visualization removal
-
   function handleSelection(item: FoodItem) {
     if (selectionMade) return;
 
@@ -504,8 +502,6 @@
       </CardContent>
     </Card>
   </div>
-
-  <!-- Algorithm insights section removed -->
 
   <!-- Live Ratings Leaderboard -->
   <Card
@@ -922,8 +918,6 @@
     border-color: var(--primary-color);
     box-shadow: 0 0 12px rgba(16, 185, 129, 0.4), var(--shadow-md);
   }
-
-  /* Algorithm insights styles removed */
 
   /* Live Ratings Styles */
   :global(.live-ratings-container) {
