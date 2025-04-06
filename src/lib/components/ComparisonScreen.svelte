@@ -402,14 +402,11 @@
 </Container>
 
 <style>
-  .comparison-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
+  :global(.comparison-container) {
     position: relative;
   }
   
-  .comparison-container::before {
+  :global(.comparison-container)::before {
     content: '';
     position: absolute;
     top: -40px;
@@ -426,19 +423,10 @@
     margin-bottom: 2rem;
   }
   
-  h1 {
-    font-size: 2.5rem;
+  :global(header .svelte-heading) {
     margin-bottom: 0.5rem;
-    color: var(--text-color);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    font-weight: 700;
     letter-spacing: -0.01em;
-  }
-  
-  header p {
-    font-size: 1.2rem;
-    color: var(--muted-color);
-    font-weight: 500;
   }
   
   .comparison-cards {
@@ -591,12 +579,9 @@
     font-weight: 400;
   }
   
-  .comparison-label {
-    font-size: 0.9rem;
-    color: var(--muted-color);
+  :global(.comparison-label) {
     letter-spacing: 0.02em;
     text-transform: uppercase;
-    font-weight: 500;
   }
   
   .loading-indicator {
@@ -645,7 +630,7 @@
       margin: 1.5rem 0;
     }
     
-    h1 {
+    :global(header .svelte-heading) {
       font-size: 2rem;
     }
     
@@ -778,16 +763,14 @@
     z-index: 1;
   }
   
-  .live-ratings-container h2 {
+  .live-ratings-container :global(.svelte-heading) {
     text-align: center;
     margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    color: white;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     position: relative;
   }
   
-  .live-ratings-container h2::after {
+  .live-ratings-container :global(.svelte-heading)::after {
     content: '';
     position: absolute;
     bottom: -8px;
@@ -868,19 +851,15 @@
     100% { opacity: 0; }
   }
   
-  .rating-rank {
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(99, 102, 241, 0.2);
-    border-radius: 50%;
-    font-weight: bold;
-    color: white;
-    font-size: 0.9rem;
-    flex-shrink: 0;
-    border: 1px solid rgba(99, 102, 241, 0.4);
+  :global(.rating-rank) {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important;
   }
   
   .rating-image {
@@ -923,10 +902,8 @@
     gap: 0.25rem;
   }
   
-  .rating-name {
-    font-weight: 600;
-    color: white;
-    font-size: 1rem;
+  :global(.rating-name) {
+    margin: 0;
   }
   
   .rating-value {
@@ -1001,7 +978,7 @@
       padding: 1rem;
     }
     
-    .live-ratings-container h2 {
+    .live-ratings-container :global(.svelte-heading) {
       font-size: 1.5rem;
     }
   }
