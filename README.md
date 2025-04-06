@@ -100,6 +100,18 @@ npm run build
     - `/ui` - Design system components
   - `App.svelte` - Main application component
   - `main.js` - Application entry point
+- `/docs` - Project documentation
+  - `PROJECT_PROGRESS.md` - Detailed log of all work completed
+  - `DESIGN_SYSTEM.md` - Comprehensive design system documentation
+  - `CODE_QUALITY.md` - Documentation of code quality improvements
+
+## Documentation
+
+For detailed information about the project, please refer to the following documentation:
+
+- [Project Progress](docs/PROJECT_PROGRESS.md) - A detailed log of all work completed, including initial state, enhancements, updates, and improvements
+- [Design System](docs/DESIGN_SYSTEM.md) - Comprehensive documentation of the design system, including colors, typography, spacing, and components
+- [Code Quality](docs/CODE_QUALITY.md) - Documentation of code quality improvements, including linting fixes, memory leak fixes, and recommendations
 
 ## License
 
