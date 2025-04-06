@@ -216,6 +216,27 @@ The spacing system uses a consistent scale based on 4px increments.
 - Use larger values (8+) for section spacing
 - Maintain consistent spacing between similar elements
 
+## Design System Demo
+
+The application includes an interactive design system demo that showcases all UI components, their variants, and usage examples. This demo serves as a living documentation of the design system and helps developers understand how to use the components correctly.
+
+### Accessing the Demo
+
+1. Run the application using the instructions in the README
+2. Click on the design system icon in the top-right corner of the application (book icon)
+3. Browse through the various components, their variants, and usage examples
+4. Return to the main application by clicking on any other navigation option
+
+### Demo Features
+
+- **Interactive Examples**: Try out different component states and interactions
+- **Component Variants**: See all available variants for each component
+- **Code Snippets**: View example code for implementing components
+- **Responsive Testing**: Test how components behave at different screen sizes
+- **Theme Switching**: Toggle between light and dark themes to see component appearance in both modes
+
+The design system demo is an essential tool for developers working on the application, ensuring consistent implementation of UI components across the project.
+
 ## Component Documentation
 
 ### Button

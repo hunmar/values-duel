@@ -64,6 +64,17 @@ The application uses a comprehensive design system that ensures consistency acro
 - Node.js (v14 or higher)
 - npm (v6 or higher)
 
+### Accessing the Design System Demo
+
+The application includes a comprehensive design system demo that showcases all UI components:
+
+1. Run the application using the instructions below
+2. Click on the design system icon in the top-right corner of the application (book icon)
+3. Browse through the various components, their variants, and usage examples
+4. Return to the main application by clicking on any other navigation option
+
+The design system demo provides a visual reference for all available components and their properties, making it easier for developers to understand and use the design system consistently.
+
 ### Installation
 
 1. Clone the repository

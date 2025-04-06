@@ -5,7 +5,8 @@ export const APP_STATES = {
   LANDING: 'landing',
   COMPARISON: 'comparison',
   RESULTS: 'results',
-  ANALYTICS: 'analytics'
+  ANALYTICS: 'analytics',
+  DESIGN_SYSTEM: 'design_system'
 };
 
 // Theme options
