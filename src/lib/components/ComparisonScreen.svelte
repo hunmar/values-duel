@@ -18,6 +18,8 @@
   let rightCardEl;
   let sortedFoodItems = [];
   let updatedRatings = {};
+  let newRatingA = null;
+  let newRatingB = null;
   
   // Subscribe to stores
   // Handle keyboard navigation
@@ -117,6 +119,10 @@
     
     console.log(`Selecting pair from ${foodList.length} items with ${currentState.comparisonHistory.length} history items`);
     
+    // Reset rating variables
+    newRatingA = null;
+    newRatingB = null;
+    
     // Select a pair for comparison
     try {
       const [nextItemA, nextItemB] = selectComparisonPair(foodList, currentState.comparisonHistory);
@@ -149,12 +155,16 @@
     
     // Calculate new ratings
     const actualOutcomeA = winningItem.id === itemA.id ? 1 : 0;
-    const { newRatingA, newRatingB } = updateRatings(itemA.rating, itemB.rating, actualOutcomeA);
+    const ratings = updateRatings(itemA.rating, itemB.rating, actualOutcomeA);
+    
+    // Store the updated ratings for immediate display and animation
+    newRatingA = ratings.newRatingA;
+    newRatingB = ratings.newRatingB;
     
     // Store the updated ratings for animation
     updatedRatings = {
-      [itemA.id]: { oldRating: itemA.rating, newRating: newRatingA },
-      [itemB.id]: { oldRating: itemB.rating, newRating: newRatingB }
+      [itemA.id]: { oldRating: itemA.rating, newRating: ratings.newRatingA },
+      [itemB.id]: { oldRating: itemB.rating, newRating: ratings.newRatingB }
     };
     
     // Add animation class to show selection feedback
@@ -311,7 +321,7 @@
         />
         <div class="keyboard-hint" aria-hidden="true">← Left Arrow</div>
         <div class="rating-display" class:updating={selectedItem && selectedItem.id === itemA.id}>
-          Rating: {itemA.rating}
+          Rating: {newRatingA ? newRatingA : itemA.rating}
         </div>
       </div>
       
@@ -331,7 +341,7 @@
         />
         <div class="keyboard-hint" aria-hidden="true">Right Arrow →</div>
         <div class="rating-display" class:updating={selectedItem && selectedItem.id === itemB.id}>
-          Rating: {itemB.rating}
+          Rating: {newRatingB ? newRatingB : itemB.rating}
         </div>
       </div>
     {/if}
