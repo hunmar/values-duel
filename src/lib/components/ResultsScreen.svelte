@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { APP_STATES } from '../stores/appState.js';
   import appState from '../stores/appState.js';
@@ -103,7 +103,7 @@
   
   function copyShareUrl() {
     // Get the input element
-    const shareInput = document.getElementById('share-url-input');
+    const shareInput = document.getElementById('share-url-input') as HTMLInputElement;
     
     // Select the text
     shareInput.select();
@@ -154,7 +154,7 @@
             on:error={(e) => {
               // Use fallback image if the main image fails to load
               if (food.fallbackImageUrl) {
-                e.target.src = food.fallbackImageUrl;
+                (e.target as HTMLImageElement).src = food.fallbackImageUrl;
               }
             }}
           />

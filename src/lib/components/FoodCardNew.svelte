@@ -1,8 +1,17 @@
-<script>
+<script lang="ts">
   import { Card, CardContent, Heading, Text } from '../ui';
   
-  export let food = {};
-  export let onClick = () => {};
+  interface FoodItem {
+    id: number;
+    name: string;
+    description: string;
+    imageUrl: string;
+    fallbackImageUrl?: string;
+    rating: number;
+  }
+
+  export let food: FoodItem = {} as FoodItem;
+  export let onClick: (food: FoodItem) => void = () => {};
   export let selected = false;
   export let keyboardAccessible = false;
 
@@ -36,7 +45,7 @@
         on:error={(e) => {
           // Use fallback image if the main image fails to load
           if (food.fallbackImageUrl) {
-            e.target.src = food.fallbackImageUrl;
+            (e.target as HTMLImageElement).src = food.fallbackImageUrl;
           }
         }}
       />
@@ -123,6 +132,7 @@
   :global(.food-description) {
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;

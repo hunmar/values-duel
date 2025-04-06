@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { APP_STATES } from '../stores/appState.js';
   import appState from '../stores/appState.js';
@@ -6,7 +6,7 @@
   import { calculateMinComparisons, updateRatings } from '../utils/eloRating.js';
   import { Container, Heading, Text, Button, Card, CardContent, Badge, Dialog } from '../ui';
   let foodList = [];
-  let importError = null;
+  let importError: string | null = null;
   let showFormatInfo = false;
   
   onMount(() => {
@@ -40,9 +40,10 @@
     }));
   }
   
-  function handleFileImport(event) {
+  function handleFileImport(event: Event) {
     importError = null;
-    const file = event.target.files[0];
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
     
     if (!file) return;
     
@@ -56,7 +57,8 @@
     reader.onload = (e) => {
       try {
         // Parse the JSON file
-        const importedData = JSON.parse(e.target.result);
+        const result = e.target?.result as string;
+        const importedData = JSON.parse(result);
         
         // Validate the imported data
         if (!Array.isArray(importedData)) {
@@ -82,7 +84,7 @@
         foodItems.set(importedData);
         
         // Reset the file input
-        event.target.value = '';
+        target.value = '';
         
         // Show success message
         alert(`Successfully imported ${importedData.length} food items.`);
@@ -206,7 +208,7 @@
                 on:error={(e) => {
                   // Use fallback image if the main image fails to load
                   if (food.fallbackImageUrl) {
-                    e.target.src = food.fallbackImageUrl;
+                    (e.target as HTMLImageElement).src = food.fallbackImageUrl;
                   }
                 }}
               />
@@ -362,7 +364,6 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
   }
   
   :global(.app-subtitle) {
@@ -511,64 +512,6 @@
   
   :global(.demo-hint) {
     opacity: 0.7;
-  }
-  
-  .format-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    padding: 1rem;
-  }
-  
-  .format-modal {
-    width: 100%;
-    max-width: 600px;
-  }
-  
-  .format-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  
-  .close-button {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: var(--card-border);
-    border: none;
-    color: var(--text-color);
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .close-button:hover {
-    background-color: var(--card-hover-border);
-  }
-  
-  .format-code {
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin: 1rem 0;
-    overflow-x: auto;
-    font-family: monospace;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: var(--text-color);
   }
   
   @media (min-width: 768px) {

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount, afterUpdate } from 'svelte';
   import { APP_STATES } from '../stores/appState.js';
   import appState from '../stores/appState.js';
@@ -15,7 +15,7 @@
   // State variables
   let rankedFoodItems = [];
   let comparisonHistory = [];
-  let progressData = {};
+  let progressData: Record<string, { name: string; ratings: number[]; color: string }> = {};
   let preferenceClusters = [];
   let personalizedRecommendations = [];
   let currentTab = 'statistics';
@@ -127,7 +127,7 @@
     statsHighlights.ratingRange = statsHighlights.highestRated.rating - statsHighlights.lowestRated.rating;
     
     // Find most and least compared items
-    const comparisonCounts = {};
+    const comparisonCounts: Record<string, number> = {};
     rankedFoodItems.forEach(item => {
       comparisonCounts[item.id] = 0;
     });
@@ -233,7 +233,7 @@
     };
     
     // Categorize foods
-    const categorizedItems = {};
+    const categorizedItems: Record<string, typeof rankedFoodItems> = {};
     
     Object.entries(categories).forEach(([category, keywords]) => {
       categorizedItems[category] = rankedFoodItems.filter(item => 
@@ -833,7 +833,7 @@
                             alt={item.name}
                             on:error={(e) => {
                               if (item.fallbackImageUrl) {
-                                e.target.src = item.fallbackImageUrl;
+                                (e.target as HTMLImageElement).src = item.fallbackImageUrl;
                               }
                             }}
                           />
@@ -895,7 +895,7 @@
                                 alt={comparison.winner.name}
                                 on:error={(e) => {
                                   if (comparison.winner.fallbackImageUrl) {
-                                    e.target.src = comparison.winner.fallbackImageUrl;
+                                    (e.target as HTMLImageElement).src = comparison.winner.fallbackImageUrl;
                                   }
                                 }}
                               />
@@ -917,7 +917,7 @@
                                 alt={comparison.loser.name}
                                 on:error={(e) => {
                                   if (comparison.loser.fallbackImageUrl) {
-                                    e.target.src = comparison.loser.fallbackImageUrl;
+                                    (e.target as HTMLImageElement).src = comparison.loser.fallbackImageUrl;
                                   }
                                 }}
                               />
@@ -972,7 +972,7 @@
                           alt={rec.basedOn}
                           on:error={(e) => {
                             if (rec.fallbackImageUrl) {
-                              e.target.src = rec.fallbackImageUrl;
+                              (e.target as HTMLImageElement).src = rec.fallbackImageUrl;
                             }
                           }}
                         />

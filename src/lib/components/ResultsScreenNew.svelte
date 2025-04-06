@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { APP_STATES } from '../stores/appState.js';
   import appState from '../stores/appState.js';
@@ -72,8 +72,8 @@
       const QrCodeLibUrl = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js';
       
       // Create and add a script element to load the QR code library
-      return new Promise((resolve, reject) => {
-        if (window.qrcode) {
+      return new Promise<void>((resolve, reject) => {
+        if ((window as any).qrcode) {
           createQrCode();
           resolve();
         } else {
@@ -94,7 +94,7 @@
       function createQrCode() {
         try {
           // Generate QR code
-          const qr = window.qrcode(0, 'L');
+          const qr = (window as any).qrcode(0, 'L');
           qr.addData(shareUrl);
           qr.make();
           
@@ -326,9 +326,8 @@
           src={rankedFoodItems[0]?.imageUrl} 
           alt={rankedFoodItems[0]?.name}
           on:error={(e) => {
-            // Use fallback image if the main image fails to load
             if (rankedFoodItems[0]?.fallbackImageUrl) {
-              e.target.src = rankedFoodItems[0].fallbackImageUrl;
+              (e.target as HTMLImageElement).src = rankedFoodItems[0].fallbackImageUrl;
             }
           }}
         />
@@ -364,9 +363,8 @@
                     src={food.imageUrl} 
                     alt={food.name}
                     on:error={(e) => {
-                      // Use fallback image if the main image fails to load
                       if (food.fallbackImageUrl) {
-                        e.target.src = food.fallbackImageUrl;
+                        (e.target as HTMLImageElement).src = food.fallbackImageUrl;
                       }
                     }}
                   />
@@ -542,30 +540,14 @@
 </Container>
 
 <Dialog 
-  open={showQrCode && qrCodeDataUrl}
+  open={showQrCode}
   title="Scan QR Code to Share"
   on:close={() => showQrCode = false}
   size="sm"
-  className="qr-code-dialog"
 >
-  <div class="qr-code-container">
-    <Text size="sm">Scan this code with a mobile device to share your results</Text>
-    
-    <div class="qr-image-container">
-      <img src={qrCodeDataUrl} alt="QR Code for your results" />
-    </div>
-  </div>
-
-  <svelte:fragment slot="footer">
-    <Button variant="default" on:click={downloadQrCode}>
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-      <span>Download QR Code</span>
-    </Button>
-  </svelte:fragment>
+  {#if qrCodeDataUrl}
+    <img src={qrCodeDataUrl} alt="QR Code" />
+  {/if}
 </Dialog>
 
 <style>
@@ -747,7 +729,8 @@
   
   :global(.food-description) {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -816,31 +799,7 @@
     align-items: center;
     gap: 0.5rem;
   }
-  
-  :global(.qr-code-dialog) {
-    max-width: 360px;
-  }
-  
-  .qr-code-container {
-    text-align: center;
-  }
-  
-  .qr-image-container {
-    background-color: white;
-    padding: 1rem;
-    border-radius: 12px;
-    display: inline-block;
-    margin: 1.5rem 0;
-    box-shadow: var(--shadow-md);
-  }
-  
-  .qr-image-container img {
-    display: block;
-    max-width: 100%;
-    width: 240px;
-    height: 240px;
-  }
-  
+   
   :global(.social-label) {
     margin-bottom: 0.75rem;
   }
@@ -923,11 +882,6 @@
     :global(.social-button svg) {
       width: 20px;
       height: 20px;
-    }
-    
-    .qr-image-container img {
-      width: 200px;
-      height: 200px;
     }
   }
 </style>

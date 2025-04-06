@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { APP_STATES } from '../stores/appState.js';
   import appState from '../stores/appState.js';
@@ -6,7 +6,7 @@
   import { calculateMinComparisons } from '../utils/eloRating.js';
   
   let foodList = [];
-  let importError = null;
+  let importError: string | null = null;
   let showFormatInfo = false;
   
   onMount(() => {
@@ -40,9 +40,10 @@
     }));
   }
   
-  function handleFileImport(event) {
+  function handleFileImport(event: Event) {
     importError = null;
-    const file = event.target.files[0];
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
     
     if (!file) return;
     
@@ -56,7 +57,8 @@
     reader.onload = (e) => {
       try {
         // Parse the JSON file
-        const importedData = JSON.parse(e.target.result);
+        const result = e.target?.result as string;
+        const importedData = JSON.parse(result);
         
         // Validate the imported data
         if (!Array.isArray(importedData)) {
@@ -82,7 +84,7 @@
         foodItems.set(importedData);
         
         // Reset the file input
-        event.target.value = '';
+        target.value = '';
         
         // Show success message
         alert(`Successfully imported ${importedData.length} food items.`);
@@ -121,7 +123,7 @@
             on:error={(e) => {
               // Use fallback image if the main image fails to load
               if (food.fallbackImageUrl) {
-                e.target.src = food.fallbackImageUrl;
+                (e.target as HTMLImageElement).src = food.fallbackImageUrl;
               }
             }}
           />
@@ -156,7 +158,7 @@
       style="display: none;"
     />
     <p class="import-format-info">
-      <a href="#" on:click|preventDefault={showImportFormat}>View required format</a>
+      <button class="format-link" on:click|preventDefault={showImportFormat}>View required format</button>
     </p>
     {#if importError}
       <p class="import-error">{importError}</p>
@@ -328,9 +330,13 @@
     margin-top: 0.5rem;
   }
   
-  .import-format-info a {
+  .import-format-info button {
+    background: none;
+    border: none;
     color: #2196F3;
-    text-decoration: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.9rem;
   }
   
   .import-error {

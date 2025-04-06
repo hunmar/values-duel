@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { APP_STATES } from '../stores/appState.js';
   import appState from '../stores/appState.js';
@@ -7,12 +7,35 @@
   import FoodCardNew from './FoodCardNew.svelte';
   import { Progress, Badge, Text, Heading, Container, Card, CardContent } from '../ui';
   
+  interface AppState {
+    comparisonHistory: any[];
+    kFactor?: number;
+    completedComparisons: number;
+    totalComparisons: number;
+  }
+
+  interface FoodItem {
+    id: number;
+    name: string;
+    description: string;
+    rating: number;
+    imageUrl: string;
+    fallbackImageUrl?: string;
+  }
+
+  interface FoodCardProps {
+    food: FoodItem;
+    onClick: (item: FoodItem) => void;
+    selected: boolean;
+    keyboardAccessible: boolean;
+  }
+  
   // Data state
-  let foodList = [];
-  let currentState = {};
-  let itemA = null;
-  let itemB = null;
-  let selectedItem = null;
+  let foodList: FoodItem[] = [];
+  let currentState: AppState = {} as AppState;
+  let itemA: FoodItem | null = null;
+  let itemB: FoodItem | null = null;
+  let selectedItem: FoodItem | null = null;
   let selectionMade = false;
   let timerId = null;
   let leftCardEl;
@@ -121,8 +144,11 @@
     if (!currentState || !Array.isArray(currentState.comparisonHistory)) {
       console.error("Invalid app state or comparison history");
       // Use empty array as fallback if comparison history is not available
-      currentState = currentState || {};
-      currentState.comparisonHistory = [];
+      currentState = {
+        comparisonHistory: [],
+        completedComparisons: 0,
+        totalComparisons: 0
+      };
     }
     
     console.log(`Selecting pair from ${foodList.length} items with ${currentState.comparisonHistory.length} history items`);
@@ -151,7 +177,7 @@
     }
   }
   
-  function handleSelection(item) {
+  function handleSelection(item: FoodItem) {
     if (selectionMade) return;
     
     selectedItem = item;
@@ -304,7 +330,7 @@
         <div class="card-container" class:winner-selected={selectedItem && selectedItem.id === itemA.id}>
           <FoodCardNew 
             food={itemA} 
-            onClick={handleSelection} 
+            onClick={() => handleSelection(itemA)} 
             selected={selectedItem && selectedItem.id === itemA.id}
             keyboardAccessible={true}
           />
@@ -326,7 +352,7 @@
         <div class="card-container" class:winner-selected={selectedItem && selectedItem.id === itemB.id}>
           <FoodCardNew 
             food={itemB} 
-            onClick={handleSelection} 
+            onClick={() => handleSelection(itemB)} 
             selected={selectedItem && selectedItem.id === itemB.id}
             keyboardAccessible={true}
           />
@@ -376,7 +402,7 @@
                 on:error={(e) => {
                   // Use fallback image if the main image fails to load
                   if (food.fallbackImageUrl) {
-                    e.target.src = food.fallbackImageUrl;
+                    (e.target as HTMLImageElement).src = food.fallbackImageUrl;
                   }
                 }}
               />
@@ -492,6 +518,7 @@
     color: var(--vs-color);
     background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: relative;
@@ -552,19 +579,19 @@
     font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   
   .current-comparison {
     color: var(--primary-color);
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
+    -webkit-text-fill-color: transparent;
   }
   
   .comparison-separator {
