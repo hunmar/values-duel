@@ -21,6 +21,16 @@
     { value: 'COOKING_METHOD', label: 'Cooking Method' }
   ];
 
+  // Timer reference for cleanup
+  let closeTimer;
+
+  // Handle component destruction
+  function onDestroy() {
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+    }
+  }
+
   // Handle form submission
   function handleSubmit() {
     // Reset messages
@@ -52,13 +62,20 @@
       newCategoryName = ''; // Reset input
 
       // Auto-close after a delay
-      setTimeout(() => {
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+      }
+      closeTimer = setTimeout(() => {
         if (success) {
           onClose();
         }
       }, 1500);
     }
   }
+
+  // Cleanup on component destruction
+  import { onDestroy as svelteOnDestroy } from 'svelte';
+  svelteOnDestroy(onDestroy);
 
   // Preview the category color
   $: previewColor = getCategoryColor(newCategoryName || 'Preview');
