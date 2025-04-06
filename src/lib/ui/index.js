@@ -17,6 +17,28 @@ import Tabs from './Tabs.svelte';
 import Text from './Text.svelte';
 import Tooltip from './Tooltip.svelte';
 
+/**
+ * UI Component Library for Taste Duel
+ * 
+ * A collection of reusable UI components inspired by the shadcn-ui design system.
+ * All components are built with accessibility, theming, and responsive design in mind.
+ * 
+ * Usage:
+ * ```svelte
+ * <script>
+ *   import { Button, Card, CardContent } from '$lib/ui';
+ * </script>
+ * 
+ * <Card>
+ *   <CardContent>
+ *     <Button>Click Me</Button>
+ *   </CardContent>
+ * </Card>
+ * ```
+ * 
+ * @module ui
+ */
+
 export {
   Alert,
   Badge,

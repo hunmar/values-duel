@@ -63,15 +63,61 @@ Components use CSS variables from the global theme. The primary variables are:
 - **Borders**: `--card-border`, `--focus-ring`
 - **Shadows**: `--shadow-sm`, `--shadow-md`, `--shadow-lg`
 
-### Accessibility
+### Theme System
 
-All components are built with accessibility in mind:
-- Proper ARIA attributes
-- Keyboard navigation support
-- Focus management
-- Screen reader friendly
+The application supports both light and dark themes, with CSS variables defined in App.svelte:
 
-## Adding New Components
+```css
+/* Dark theme */
+:global([data-theme="dark"]) {
+  --bg-color: #0f172a;
+  --text-color: #f8fafc;
+  --card-bg: #1e293b;
+  /* ... other variables ... */
+}
+
+/* Light theme */
+:global([data-theme="light"]) {
+  --bg-color: #f8fafc;
+  --text-color: #0f172a;
+  --card-bg: #ffffff;
+  /* ... other variables ... */
+}
+```
+
+Theme can be switched using the `applyTheme()` function from the appState store:
+
+```js
+import { THEMES, applyTheme } from './lib/stores/appState.js';
+
+// Apply dark theme
+applyTheme(THEMES.DARK);
+
+// Apply light theme
+applyTheme(THEMES.LIGHT);
+```
+
+### Accessibility Features
+
+The component library includes built-in accessibility features:
+
+- Reduced motion mode: Disables animations for users who prefer minimal motion
+- High contrast mode: Enhances contrast for better visibility
+- Font size adjustments: Allows users to increase text size
+
+These features can be applied using the `applyAccessibilityPreferences()` function:
+
+```js
+import { applyAccessibilityPreferences } from './lib/stores/appState.js';
+
+applyAccessibilityPreferences({
+  reducedMotion: true,
+  highContrast: false,
+  fontSize: 'large'
+});
+```
+
+### Adding New Components
 
 When adding new components:
 
@@ -82,7 +128,7 @@ When adding new components:
 5. Ensure dark mode compatibility
 6. Test for accessibility compliance
 
-## Best Practices
+### Best Practices
 
 - Use semantic HTML elements wherever possible
 - Keep components single-purpose and composable
@@ -90,3 +136,6 @@ When adding new components:
 - Document prop options in component JSDoc comments
 - Ensure proper type checking with prop validation
 - Test components on different screen sizes
+- Use CSS variables for all colors and dimensions
+- Implement keyboard navigation for interactive components
+- Add appropriate ARIA attributes for screen readers
