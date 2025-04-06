@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
-  import { fade, fly, slide } from 'svelte/transition';
+  import { fade, fly, slide, crossfade } from 'svelte/transition';
+  import { quintOut, cubicInOut } from 'svelte/easing';
   import { APP_STATES, THEMES, applyTheme } from './lib/stores/appState.js';
   import appState from './lib/stores/appState.js';
   import foodItems from './lib/stores/foodItems.js';
@@ -12,6 +13,73 @@
   let currentAppState = APP_STATES.LANDING;
   let previousAppState = null;
   let showHelp = false;
+  let showConfetti = false;
+  
+  // Simple confetti animation for the results screen
+  function createConfetti() {
+    const confettiCount = 150;
+    const container = document.querySelector('.app-container');
+    if (!container) return;
+    
+    showConfetti = true;
+    
+    // Create confetti pieces
+    for (let i = 0; i < confettiCount; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      
+      // Random position
+      const xPos = Math.random() * 100;
+      
+      // Random colors
+      const colors = ['#10b981', '#6366f1', '#f43f5e', '#facc15', '#3b82f6'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      
+      // Random shape
+      const shapes = ['circle', 'square', 'triangle'];
+      const shape = shapes[Math.floor(Math.random() * shapes.length)];
+      
+      // Random size
+      const size = Math.random() * 10 + 5;
+      
+      // Set styles
+      confetti.style.left = `${xPos}%`;
+      confetti.style.backgroundColor = color;
+      confetti.style.width = `${size}px`;
+      confetti.style.height = `${size}px`;
+      
+      // Apply shape
+      if (shape === 'circle') {
+        confetti.style.borderRadius = '50%';
+      } else if (shape === 'triangle') {
+        confetti.style.borderRadius = '0';
+        confetti.style.background = 'none';
+        confetti.style.width = '0';
+        confetti.style.height = '0';
+        confetti.style.borderLeft = `${size/2}px solid transparent`;
+        confetti.style.borderRight = `${size/2}px solid transparent`;
+        confetti.style.borderBottom = `${size}px solid ${color}`;
+      }
+      
+      // Add animation with random duration and delay
+      const animationDuration = Math.random() * 3 + 2;
+      const animationDelay = Math.random() * 2;
+      
+      confetti.style.animation = `fall ${animationDuration}s ease-in ${animationDelay}s forwards`;
+      
+      // Add to container
+      container.appendChild(confetti);
+      
+      // Remove confetti after animation
+      setTimeout(() => {
+        confetti.remove();
+        if (i === confettiCount - 1) {
+          // Last confetti piece removed
+          showConfetti = false;
+        }
+      }, (animationDuration + animationDelay) * 1000);
+    }
+  }
   
   // Import SVG image creation function from the foodItems module
   let createSVGImageData;
@@ -33,6 +101,21 @@
     // Check if there are shared results in the URL
     const urlParams = new URLSearchParams(window.location.search);
     const sharedResults = urlParams.get('results');
+    
+    // Listen for app state changes to trigger confetti on results screen
+    appState.subscribe(state => {
+      previousAppState = currentAppState;
+      currentAppState = state.currentState;
+      
+      // If transitioning to results screen, trigger confetti animation
+      if (previousAppState === APP_STATES.COMPARISON && currentAppState === APP_STATES.RESULTS) {
+        // Delay confetti to wait for transition to complete
+        setTimeout(createConfetti, 800);
+      }
+      
+      // Always apply dark theme
+      applyTheme(THEMES.DARK);
+    });
     
     if (sharedResults) {
       try {
@@ -151,30 +234,31 @@
       }
     }
     
-    // Subscribe to app state changes
-    const unsubscribe = appState.subscribe(state => {
-      previousAppState = currentAppState;
-      currentAppState = state.currentState;
-      
-      // Always apply dark theme
-      applyTheme(THEMES.DARK);
-    });
-    
     // Apply dark theme immediately
     applyTheme(THEMES.DARK);
     
-    // Return the unsubscribe function for cleanup
-    return unsubscribe;
+    // Return the unsubscribe function for cleanup - we're using the subscription from above
+    return () => {};
   });
 
-  // Determine transition direction based on state change
+  // Enhanced transitions with better easing and more sophisticated motion
   function getTransitionProps() {
+    const easing = { duration: 400, easing: cubicOut };
+    const forwardEasing = { duration: 500, easing: cubicOut };
+    const backEasing = { duration: 400, easing: cubicOut };
+    
     // Moving forward in the app flow
     if (
       (previousAppState === APP_STATES.LANDING && currentAppState === APP_STATES.COMPARISON) ||
       (previousAppState === APP_STATES.COMPARISON && currentAppState === APP_STATES.RESULTS)
     ) {
-      return { x: 300, duration: 300, opacity: 0 };
+      return { 
+        x: 300, 
+        y: 20, 
+        scale: 0.95, 
+        opacity: 0,
+        ...forwardEasing
+      };
     } 
     // Moving backward in the app flow
     else if (
@@ -182,10 +266,26 @@
       (previousAppState === APP_STATES.RESULTS && currentAppState === APP_STATES.COMPARISON) ||
       (previousAppState === APP_STATES.RESULTS && currentAppState === APP_STATES.LANDING)
     ) {
-      return { x: -300, duration: 300, opacity: 0 };
+      return { 
+        x: -300, 
+        scale: 0.95, 
+        opacity: 0,
+        ...backEasing
+      };
     }
-    // Default/initial transition
-    return { y: 20, duration: 300, opacity: 0 };
+    // Initial load or unknown transition
+    return { 
+      y: 30, 
+      scale: 0.98,
+      opacity: 0,
+      ...easing
+    };
+  }
+  
+  // Custom easing function for smoother motion
+  function cubicOut(t) {
+    const f = t - 1.0;
+    return f * f * f + 1.0;
   }
 </script>
 
@@ -242,16 +342,29 @@
   {/if}
 
   <main>
+    <!-- Add crossfade animation for smoother transitions between screen states -->
     {#if currentAppState === APP_STATES.LANDING}
-      <div in:fly={getTransitionProps()} out:fade={{ duration: 200 }}>
+      <div 
+        in:fly={getTransitionProps()} 
+        out:fade={{ duration: 300, easing: cubicOut }}
+        class="screen-container"
+      >
         <LandingScreenNew />
       </div>
     {:else if currentAppState === APP_STATES.COMPARISON}
-      <div in:fly={getTransitionProps()} out:fade={{ duration: 200 }}>
+      <div 
+        in:fly={getTransitionProps()} 
+        out:fade={{ duration: 300, easing: cubicOut }}
+        class="screen-container"
+      >
         <ComparisonScreen />
       </div>
     {:else if currentAppState === APP_STATES.RESULTS}
-      <div in:fly={getTransitionProps()} out:fade={{ duration: 200 }}>
+      <div 
+        in:fly={getTransitionProps()} 
+        out:fade={{ duration: 300, easing: cubicOut }}
+        class="screen-container"
+      >
         <ResultsScreenNew />
       </div>
     {/if}
@@ -387,6 +500,17 @@
     padding: 40px 20px;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+  }
+  
+  .screen-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 40px 20px;
+    transform-origin: center;
+    will-change: transform, opacity;
   }
   
   .app-controls {
@@ -548,5 +672,23 @@
   .help-content ol li::marker {
     color: #a5b4fc; /* Lighter secondary color for better contrast */
     font-weight: 600;
+  }
+  /* Confetti animation */
+  .confetti {
+    position: fixed;
+    z-index: 1000;
+    top: -20px;
+    pointer-events: none;
+  }
+  
+  @keyframes fall {
+    0% {
+      transform: translateY(-20px) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) rotate(720deg);
+      opacity: 0;
+    }
   }
 </style>
