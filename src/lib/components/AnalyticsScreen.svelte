@@ -1016,7 +1016,7 @@
 </Container>
 
 <style>
-  .analytics-container {
+  :global(.analytics-container) {
     padding-top: 2rem;
     padding-bottom: 4rem;
   }
