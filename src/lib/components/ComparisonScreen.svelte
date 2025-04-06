@@ -300,14 +300,14 @@
     aria-label="Food comparison">
     {#if itemA && itemB}
       <div bind:this={leftCardEl} class="card-wrapper">
-        <FoodCard 
-          food={itemA} 
-          onClick={handleSelection} 
-          selected={selectedItem && selectedItem.id === itemA.id}
-          keyboardAccessible={true}
-          class="food-card"
-          class:winner-selected={selectedItem && selectedItem.id === itemA.id}
-        />
+        <div class="card-container" class:winner-selected={selectedItem && selectedItem.id === itemA.id}>
+          <FoodCard 
+            food={itemA} 
+            onClick={handleSelection} 
+            selected={selectedItem && selectedItem.id === itemA.id}
+            keyboardAccessible={true}
+          />
+        </div>
         <div class="keyboard-hint" aria-hidden="true">← Left Arrow</div>
         <div class="rating-display" class:updating={leftRatingUpdating}>
           Rating: {newRatingA ? newRatingA : itemA.rating}
@@ -322,14 +322,14 @@
       </div>
       
       <div bind:this={rightCardEl} class="card-wrapper">
-        <FoodCard 
-          food={itemB} 
-          onClick={handleSelection} 
-          selected={selectedItem && selectedItem.id === itemB.id}
-          keyboardAccessible={true}
-          class="food-card"
-          class:winner-selected={selectedItem && selectedItem.id === itemB.id}
-        />
+        <div class="card-container" class:winner-selected={selectedItem && selectedItem.id === itemB.id}>
+          <FoodCard 
+            food={itemB} 
+            onClick={handleSelection} 
+            selected={selectedItem && selectedItem.id === itemB.id}
+            keyboardAccessible={true}
+          />
+        </div>
         <div class="keyboard-hint" aria-hidden="true">Right Arrow →</div>
         <div class="rating-display" class:updating={rightRatingUpdating}>
           Rating: {newRatingB ? newRatingB : itemB.rating}
@@ -466,6 +466,11 @@
     flex-direction: column;
     align-items: center;
     position: relative;
+  }
+  
+  .card-container {
+    width: 100%;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   .keyboard-hint {
@@ -651,21 +656,28 @@
   }
   
   /* Animation styles using Svelte's scoped CSS with class directives */
-  .comparison-cards.choice-made .food-card:not(.winner-selected) {
+  .comparison-cards.choice-made :global(.food-card) {
     opacity: 0.4;
     transform: scale(0.94);
     filter: grayscale(0.5);
-    border-color: var(--card-border);
   }
   
-  :global(.food-card).winner-selected {
+  .card-container {
+    position: relative;
+  }
+  
+  .card-container.winner-selected :global(.food-card) {
+    opacity: 1;
+    transform: scale(1);
+    filter: none;
+  }
+  
+  .card-container.winner-selected {
     transform: scale(1.05) translateY(-15px);
-    box-shadow: var(--shadow-xl), 0 0 20px rgba(16, 185, 129, 0.3);
     z-index: 10;
-    border-color: var(--card-selected-border);
   }
   
-  :global(.food-card).winner-selected::after {
+  .card-container.winner-selected::after {
     content: "✓";
     position: absolute;
     top: -15px;
