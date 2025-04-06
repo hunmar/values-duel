@@ -131,6 +131,8 @@
     bind:this={dialogRef}
     class="dialog-overlay {overlayClassName}"
     on:click={handleClickOutside}
+    on:keydown={() => {}}
+    role="presentation"
     transition:fade={{ duration: 150 }}
   >
     <div

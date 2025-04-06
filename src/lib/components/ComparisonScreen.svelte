@@ -4,8 +4,8 @@
   import appState from '../stores/appState.js';
   import foodItems from '../stores/foodItems.js';
   import { selectComparisonPair, updateRatings, sortItemsByRating } from '../utils/eloRating.js';
-  import FoodCard from './FoodCard.svelte';
-  import { Progress, Badge, Text, Heading, Container } from '../ui';
+  import FoodCardNew from './FoodCardNew.svelte';
+  import { Progress, Badge, Text, Heading, Container, Card, CardContent } from '../ui';
   
   // Data state
   let foodList = [];
@@ -302,85 +302,90 @@
     {#if itemA && itemB}
       <div bind:this={leftCardEl} class="card-wrapper">
         <div class="card-container" class:winner-selected={selectedItem && selectedItem.id === itemA.id}>
-          <FoodCard 
+          <FoodCardNew 
             food={itemA} 
             onClick={handleSelection} 
             selected={selectedItem && selectedItem.id === itemA.id}
             keyboardAccessible={true}
           />
         </div>
-        <div class="keyboard-hint" aria-hidden="true">← Left Arrow</div>
-        <div class="rating-display" class:updating={leftRatingUpdating}>
+        <Badge variant="secondary" className="keyboard-hint" aria-hidden="true">← Left Arrow</Badge>
+        <Badge variant="outline" className="rating-display {leftRatingUpdating ? 'updating' : ''}">
           Rating: {newRatingA ? newRatingA : itemA.rating}
-        </div>
+        </Badge>
       </div>
       
       <div class="vs-indicator" aria-hidden="true">
         <span>VS</span>
-        <div class="keyboard-instructions">
+        <Badge variant="outline" className="keyboard-instructions">
           Use arrow keys to select
-        </div>
+        </Badge>
       </div>
       
       <div bind:this={rightCardEl} class="card-wrapper">
         <div class="card-container" class:winner-selected={selectedItem && selectedItem.id === itemB.id}>
-          <FoodCard 
+          <FoodCardNew 
             food={itemB} 
             onClick={handleSelection} 
             selected={selectedItem && selectedItem.id === itemB.id}
             keyboardAccessible={true}
           />
         </div>
-        <div class="keyboard-hint" aria-hidden="true">Right Arrow →</div>
-        <div class="rating-display" class:updating={rightRatingUpdating}>
+        <Badge variant="secondary" className="keyboard-hint" aria-hidden="true">Right Arrow →</Badge>
+        <Badge variant="outline" className="rating-display {rightRatingUpdating ? 'updating' : ''}">
           Rating: {newRatingB ? newRatingB : itemB.rating}
-        </div>
+        </Badge>
       </div>
     {/if}
   </div>
   
   <div class="comparison-info-container">
-    <div class="comparison-info">
-      {#if typeof currentState.completedComparisons === 'number' && typeof currentState.totalComparisons === 'number'}
-        <div class="comparison-count">
-          <span class="current-comparison">{currentState.completedComparisons + 1}</span>
-          <span class="comparison-separator">/</span>
-          <span class="total-comparisons">{currentState.totalComparisons}</span>
-        </div>
-        <Text size="sm" className="comparison-label">Comparisons completed</Text>
-      {:else}
-        <div class="loading-indicator">
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-        </div>
-        <Text size="sm" className="comparison-label">Loading comparisons...</Text>
-      {/if}
-    </div>
+    <Card className="comparison-info">
+      <CardContent>
+        {#if typeof currentState.completedComparisons === 'number' && typeof currentState.totalComparisons === 'number'}
+          <div class="comparison-count">
+            <span class="current-comparison">{currentState.completedComparisons + 1}</span>
+            <span class="comparison-separator">/</span>
+            <span class="total-comparisons">{currentState.totalComparisons}</span>
+          </div>
+          <Text size="sm" className="comparison-label">Comparisons completed</Text>
+        {:else}
+          <div class="loading-indicator">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+          <Text size="sm" className="comparison-label">Loading comparisons...</Text>
+        {/if}
+      </CardContent>
+    </Card>
   </div>
   
   <!-- Live Ratings Leaderboard -->
-  <div class="live-ratings-container">
-    <Heading level={2} size="xl">Live Ratings</Heading>
-    <div class="ratings-grid">
-      {#each sortedFoodItems as food, index}
-        <div class="rating-item" class:rating-updating={updatedRatings[food.id]}>
-          <Badge variant="secondary" className="rating-rank">#{index + 1}</Badge>
-          <div class="rating-image">
-            <img 
-              src={food.imageUrl} 
-              alt={food.name}
-              on:error={(e) => {
-                // Use fallback image if the main image fails to load
-                if (food.fallbackImageUrl) {
-                  e.target.src = food.fallbackImageUrl;
-                }
-              }}
-            />
-          </div>
-          <div class="rating-info">
-            <Text weight="semibold" className="rating-name">{food.name}</Text>
-            <div class="rating-value" class:increasing={updatedRatings[food.id] && updatedRatings[food.id].newRating > updatedRatings[food.id].oldRating} class:decreasing={updatedRatings[food.id] && updatedRatings[food.id].newRating < updatedRatings[food.id].oldRating}>
+  <Card className="live-ratings-container">
+    <CardContent>
+      <Heading level={2} size="xl" className="ratings-title">Live Ratings</Heading>
+      <div class="ratings-grid">
+        {#each sortedFoodItems as food, index}
+          <div class="rating-item-wrapper {updatedRatings[food.id] ? 'rating-updating' : ''}">
+            <Badge variant="secondary" className="rating-rank">#{index + 1}</Badge>
+            <div class="rating-image">
+              <img 
+                src={food.imageUrl} 
+                alt={food.name}
+                on:error={(e) => {
+                  // Use fallback image if the main image fails to load
+                  if (food.fallbackImageUrl) {
+                    e.target.src = food.fallbackImageUrl;
+                  }
+                }}
+              />
+            </div>
+            <div class="rating-info">
+              <Text weight="semibold" className="rating-name">{food.name}</Text>
+            </div>
+            
+            <div class="rating-value {updatedRatings[food.id] && updatedRatings[food.id].newRating > updatedRatings[food.id].oldRating ? 'increasing' : ''} {updatedRatings[food.id] && updatedRatings[food.id].newRating < updatedRatings[food.id].oldRating ? 'decreasing' : ''}">
               <span class="rating-number">{food.rating}</span>
               {#if updatedRatings[food.id]}
                 <span class="rating-change">
@@ -395,10 +400,10 @@
               {/if}
             </div>
           </div>
-        </div>
-      {/each}
-    </div>
-  </div>
+        {/each}
+      </div>
+    </CardContent>
+  </Card>
 </Container>
 
 <style>
@@ -462,20 +467,13 @@
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
-  .keyboard-hint {
+  :global(.keyboard-hint) {
     margin-top: 1rem;
-    font-size: 0.9rem;
-    color: var(--secondary-color);
-    background-color: rgba(99, 102, 241, 0.15);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
     opacity: 0;
     transition: all 0.3s ease;
-    box-shadow: var(--shadow-sm);
-    font-weight: 500;
   }
   
-  .card-wrapper:focus-within .keyboard-hint {
+  .card-wrapper:focus-within :global(.keyboard-hint) {
     opacity: 1;
     transform: translateY(-5px);
   }
@@ -513,15 +511,10 @@
     transform: translate(-50%, -50%);
   }
   
-  .keyboard-instructions {
+  :global(.keyboard-instructions) {
     font-size: 0.9rem;
-    color: var(--text-color);
-    background-color: var(--keyboard-hint-bg);
-    padding: 0.6rem 1.2rem;
-    border-radius: 20px;
     white-space: nowrap;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--card-border);
+    margin-top: 1.5rem;
   }
   
   .comparison-info-container {
@@ -530,21 +523,21 @@
     margin-top: 2.5rem;
   }
   
-  .comparison-info {
+  :global(.comparison-info) {
+    width: auto;
     text-align: center;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  :global(.comparison-info > .card-content) {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: rgba(17, 24, 39, 0.7);
-    padding: 1rem 2rem;
-    border-radius: 16px;
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    box-shadow: var(--shadow-md);
-    position: relative;
-    overflow: hidden;
+    padding: 1.5rem 2.5rem;
   }
   
-  .comparison-info::before {
+  :global(.comparison-info)::before {
     content: '';
     position: absolute;
     left: 0;
@@ -633,12 +626,6 @@
     :global(header .svelte-heading) {
       font-size: 2rem;
     }
-    
-    .rating-display {
-      margin-top: 0.75rem;
-      font-size: 0.9rem;
-      padding: 0.4rem 0.8rem;
-    }
   }
   
   /* Animation styles using Svelte's scoped CSS with class directives */
@@ -706,53 +693,28 @@
     transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
-  .rating-display {
+  :global(.rating-display) {
     position: relative;
     margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    color: white;
-    border-radius: 8px;
-    text-align: center;
     font-weight: 500;
     font-size: 1rem;
-    box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
   }
   
-  .rating-display::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(16, 185, 129, 0.2));
-    border-radius: 8px;
-    z-index: -1;
-    opacity: 0.5;
-  }
-  
-  .rating-display.updating {
+  :global(.rating-display.updating) {
     animation: ratingUpdate 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     border-color: var(--primary-color);
     box-shadow: 0 0 12px rgba(16, 185, 129, 0.4), var(--shadow-md);
   }
   
   /* Live Ratings Styles */
-  .live-ratings-container {
+  :global(.live-ratings-container) {
     margin-top: 3rem;
-    background: rgba(17, 24, 39, 0.7);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(99, 102, 241, 0.2);
-    overflow: hidden;
     position: relative;
+    overflow: hidden;
   }
   
-  .live-ratings-container::before {
+  :global(.live-ratings-container)::before {
     content: '';
     position: absolute;
     top: 0;
@@ -763,14 +725,14 @@
     z-index: 1;
   }
   
-  .live-ratings-container :global(.svelte-heading) {
+  :global(.ratings-title) {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.5rem !important;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     position: relative;
   }
   
-  .live-ratings-container :global(.svelte-heading)::after {
+  :global(.ratings-title)::after {
     content: '';
     position: absolute;
     bottom: -8px;
@@ -784,49 +746,51 @@
   
   .ratings-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1rem;
     margin-top: 1rem;
   }
   
-  .rating-item {
-    background: rgba(30, 41, 59, 0.8);
-    border-radius: 10px;
-    padding: 1rem;
+  .rating-item-wrapper {
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: var(--card-bg, #1e293b);
+    border-radius: 0.75rem;
+    border: 1px solid var(--card-border, rgba(99, 102, 241, 0.2));
+    box-shadow: var(--shadow-md);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 1px solid rgba(99, 102, 241, 0.2);
     position: relative;
     cursor: pointer;
+    overflow: visible;
   }
   
-  .rating-item::before {
+  .rating-item-wrapper::before {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 10px;
+    border-radius: 0.75rem;
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.1));
     z-index: -1;
     opacity: 0.5;
   }
   
-  .rating-item:hover {
+  .rating-item-wrapper:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
     border-color: var(--card-hover-border);
-    background: rgba(30, 41, 59, 0.95);
   }
   
-  .rating-updating {
+  .rating-item-wrapper.rating-updating {
     animation: ratingItemUpdate 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     border-color: var(--primary-color);
     box-shadow: 0 0 15px rgba(16, 185, 129, 0.5), var(--shadow-md);
     z-index: 10;
   }
   
-  .rating-updating::after {
+  .rating-item-wrapper.rating-updating::after {
     content: '';
     position: absolute;
     inset: -2px;
@@ -863,10 +827,10 @@
   }
   
   .rating-image {
-    width: 50px;
-    height: 50px;
+    width: 42px;
+    height: 42px;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 6px;
     flex-shrink: 0;
     border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
@@ -891,27 +855,35 @@
     transition: transform 0.5s ease;
   }
   
-  .rating-item:hover .rating-image img {
+  .rating-item-wrapper:hover .rating-image img {
     transform: scale(1.1);
   }
   
   .rating-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    flex: 1;
+    min-width: 0; /* Ensure text truncation works correctly in flex context */
+    overflow: hidden;
   }
   
   :global(.rating-name) {
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .rating-value {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 0.5rem;
     font-size: 0.9rem;
     color: var(--muted-color);
+    white-space: nowrap;
+    margin-left: auto;
+    padding-left: 0.5rem;
+    min-width: 70px;
+    text-align: right;
   }
   
   .rating-number {
@@ -919,11 +891,12 @@
   }
   
   .rating-change {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.25rem;
     font-size: 0.8rem;
     animation: fadeIn 0.5s ease-in-out;
+    margin-left: 0.25rem;
   }
   
   .rating-arrow {
@@ -974,12 +947,26 @@
       grid-template-columns: 1fr;
     }
     
-    .live-ratings-container {
+    :global(.live-ratings-container) {
       padding: 1rem;
     }
     
-    .live-ratings-container :global(.svelte-heading) {
-      font-size: 1.5rem;
+    :global(.ratings-title) {
+      font-size: 1.5rem !important;
+    }
+    
+    .rating-image {
+      width: 36px;
+      height: 36px;
+    }
+    
+    .rating-item-wrapper {
+      padding: 0.6rem;
+      gap: 0.5rem;
+    }
+    
+    .rating-value {
+      min-width: 60px;
     }
   }
 </style>

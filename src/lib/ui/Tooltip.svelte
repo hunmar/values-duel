@@ -135,6 +135,8 @@
   on:mouseleave={hideTooltip}
   on:focus={showTooltip}
   on:blur={hideTooltip}
+  on:keydown={() => {}}
+  role="presentation"
 >
   <slot />
 </div>

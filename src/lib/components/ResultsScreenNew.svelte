@@ -5,7 +5,7 @@
   import foodItems from '../stores/foodItems.js';
   import { sortItemsByRating } from '../utils/eloRating.js';
   import { STORAGE_KEYS, saveToLocalStorage, clearAllAppData } from '../utils/localStorage.js';
-  import { Container, Heading, Text, Button, Card, CardContent, Badge, Dialog } from '../ui';
+  import { Container, Heading, Text, Button, Card, CardContent, CardHeader, Badge, Dialog, Input } from '../ui';
   
   function navigateToAnalytics() {
     appState.update(state => ({
@@ -242,24 +242,37 @@
     document.body.removeChild(link);
   }
   
-  function copyShareUrl() {
-    // Get the input element
-    const shareInput = document.getElementById('share-url-input');
+  async function copyShareUrl() {
+    if (!shareUrl) return;
     
-    // Select the text
-    shareInput.select();
-    shareInput.setSelectionRange(0, 99999); // For mobile devices
-    
-    // Copy the text to the clipboard
-    document.execCommand('copy');
-    
-    // Update the copy success state
-    copySuccess = true;
-    
-    // Reset the copy success state after 2 seconds
-    setTimeout(() => {
-      copySuccess = false;
-    }, 2000);
+    try {
+      // Try to use the modern Clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        // Fallback to the older method
+        const shareInput = document.getElementById('share-url-input');
+        if (shareInput) {
+          // Find the actual input element inside our Input component
+          const inputElement = shareInput.querySelector('input');
+          if (inputElement) {
+            inputElement.select();
+            inputElement.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand('copy');
+          }
+        }
+      }
+      
+      // Update the copy success state
+      copySuccess = true;
+      
+      // Reset the copy success state after 2 seconds
+      setTimeout(() => {
+        copySuccess = false;
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy text: ', error);
+    }
   }
   
   // Get trophy icon based on position
@@ -330,11 +343,11 @@
   
   <div class="results-grid">
     <Card className="rankings-card">
+      <CardHeader className="rankings-header">
+        <Heading level={2} size="h3">Complete Ranking</Heading>
+        <Badge variant="outline">{rankedFoodItems.length} items</Badge>
+      </CardHeader>
       <CardContent>
-        <div class="card-header-content">
-          <Heading level={2} size="h3">Complete Ranking</Heading>
-          <Badge variant="outline">{rankedFoodItems.length} items</Badge>
-        </div>
         
         <div class="ranked-list">
           {#each rankedFoodItems as food, index}
@@ -379,8 +392,10 @@
     
     <div class="side-content">
       <Card className="actions-card">
-        <CardContent>
+        <CardHeader>
           <Heading level={2} size="h3">Actions</Heading>
+        </CardHeader>
+        <CardContent>
           
           <div class="actions-buttons">
             <Button variant="default" className="action-button" on:click={restartRanking}>
@@ -414,17 +429,21 @@
       
       {#if shareUrl}
         <Card className="share-card">
-          <CardContent>
+          <CardHeader>
             <Heading level={2} size="h3">Share Your Results</Heading>
             <Text size="sm">Share your food preferences with friends and family using this link:</Text>
+          </CardHeader>
+          <CardContent>
             
             <div class="share-url-container">
-              <input 
+              <Input 
                 type="text" 
                 readonly 
-                value={shareUrl} 
-                class="share-url" 
-                id="share-url-input" 
+                value={shareUrl}
+                className="share-url-input"
+                id="share-url-input"
+                variant="outlined"
+                fullWidth={true}
               />
               <Button 
                 variant="default" 
@@ -452,59 +471,69 @@
               </Button>
             </div>
             
-            <div class="social-share">
-              <Text size="sm" className="social-label">Share on social media:</Text>
-              <div class="social-buttons">
-                <a 
-                  href={`https://twitter.com/intent/tweet?text=I%20ranked%20my%20favorite%20foods%20with%20Taste%20Duel!%20${rankedFoodItems[0]?.name}%20came%20out%20on%20top.%20Check%20out%20my%20full%20rankings:&url=${encodeURIComponent(shareUrl)}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  class="social-button twitter"
-                  aria-label="Share on Twitter"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                  <span>Twitter</span>
-                </a>
-                <a 
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  class="social-button facebook"
-                  aria-label="Share on Facebook"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/>
-                  </svg>
-                  <span>Facebook</span>
-                </a>
-                <a 
-                  href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=My%20Food%20Rankings&summary=I%20used%20Taste%20Duel%20to%20discover%20my%20food%20preferences.%20${rankedFoodItems[0]?.name}%20is%20my%20top%20choice!`} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  class="social-button linkedin"
-                  aria-label="Share on LinkedIn"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
-                  <span>LinkedIn</span>
-                </a>
-                <a 
-                  href={`whatsapp://send?text=I%20ranked%20my%20favorite%20foods%20with%20Taste%20Duel!%20Check%20out%20my%20results:%20${encodeURIComponent(shareUrl)}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  class="social-button whatsapp"
-                  aria-label="Share on WhatsApp"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-                  </svg>
-                  <span>WhatsApp</span>
-                </a>
-              </div>
-            </div>
+            <Card className="social-share-card">
+              <CardContent>
+                <Text size="sm" className="social-label">Share on social media:</Text>
+                <div class="social-buttons">
+                  <Button 
+                    variant="outline" 
+                    className="social-button twitter"
+                    as="a" 
+                    href={`https://twitter.com/intent/tweet?text=I%20ranked%20my%20favorite%20foods%20with%20Taste%20Duel!%20${rankedFoodItems[0]?.name}%20came%20out%20on%20top.%20Check%20out%20my%20full%20rankings:&url=${encodeURIComponent(shareUrl)}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    aria-label="Share on Twitter"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    <span>Twitter</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="social-button facebook"
+                    as="a" 
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    aria-label="Share on Facebook"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/>
+                    </svg>
+                    <span>Facebook</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="social-button linkedin"
+                    as="a" 
+                    href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=My%20Food%20Rankings&summary=I%20used%20Taste%20Duel%20to%20discover%20my%20food%20preferences.%20${rankedFoodItems[0]?.name}%20is%20my%20top%20choice!`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    aria-label="Share on LinkedIn"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                    <span>LinkedIn</span>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="social-button whatsapp"
+                    as="a" 
+                    href={`whatsapp://send?text=I%20ranked%20my%20favorite%20foods%20with%20Taste%20Duel!%20Check%20out%20my%20results:%20${encodeURIComponent(shareUrl)}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    aria-label="Share on WhatsApp"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                    </svg>
+                    <span>WhatsApp</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </CardContent>
         </Card>
       {/if}
@@ -512,36 +541,35 @@
   </div>
 </Container>
 
-{#if showQrCode && qrCodeDataUrl}
-  <div class="qr-code-modal-overlay" on:click={() => showQrCode = false}>
-    <div class="qr-code-modal" on:click|stopPropagation>
-      <button class="close-modal-button" on:click={() => showQrCode = false}>×</button>
-      
-      <div class="qr-code-container">
-        <h3>Scan QR Code to Share</h3>
-        <p>Scan this code with a mobile device to share your results</p>
-        
-        <div class="qr-image-container">
-          <img src={qrCodeDataUrl} alt="QR Code for your results" />
-        </div>
-        
-        <div class="qr-code-actions">
-          <Button variant="default" on:click={downloadQrCode}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            <span>Download QR Code</span>
-          </Button>
-        </div>
-      </div>
+<Dialog 
+  open={showQrCode && qrCodeDataUrl}
+  title="Scan QR Code to Share"
+  on:close={() => showQrCode = false}
+  size="sm"
+  className="qr-code-dialog"
+>
+  <div class="qr-code-container">
+    <Text size="sm">Scan this code with a mobile device to share your results</Text>
+    
+    <div class="qr-image-container">
+      <img src={qrCodeDataUrl} alt="QR Code for your results" />
     </div>
   </div>
-{/if}
+
+  <svelte:fragment slot="footer">
+    <Button variant="default" on:click={downloadQrCode}>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      <span>Download QR Code</span>
+    </Button>
+  </svelte:fragment>
+</Dialog>
 
 <style>
-  .results-container {
+  :global(.results-container) {
     padding-top: 2rem;
     padding-bottom: 4rem;
   }
@@ -558,15 +586,6 @@
     font-size: 3rem;
     margin-bottom: 1rem;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-  }
-  
-  .results-title {
-    margin-bottom: 0.5rem;
-  }
-  
-  .shared-badge,
-  .demo-badge {
-    margin-bottom: 1rem;
   }
   
   .demo-note {
@@ -629,11 +648,11 @@
     text-align: center;
   }
   
-  .first-badge {
+  :global(.first-badge) {
     margin-bottom: 0.5rem;
   }
   
-  .top-food-name {
+  :global(.top-food-name) {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.25rem;
@@ -650,11 +669,10 @@
     gap: 1.5rem;
   }
   
-  .card-header-content {
+  :global(.rankings-header) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
   }
   
   .ranked-list {
@@ -682,6 +700,8 @@
   .top-three {
     background: linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));
     border-left: 3px solid var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
   }
   
   .rank {
@@ -772,20 +792,17 @@
     display: flex;
     margin: 1rem 0;
     gap: 0.5rem;
+    align-items: flex-start;
   }
   
-  .share-url {
+  :global(.share-url-input) {
     flex: 1;
-    padding: 0.75rem;
-    border-radius: 8px;
-    border: 1px solid var(--card-border);
-    background-color: rgba(15, 23, 42, 0.3);
-    color: var(--text-color);
-    font-size: 0.875rem;
+    margin-bottom: 0;
   }
   
   :global(.copy-button) {
     min-width: 80px;
+    height: 2.5rem;
   }
   
   .share-options {
@@ -800,76 +817,12 @@
     gap: 0.5rem;
   }
   
-  .qr-code-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 1rem;
-  }
-  
-  .qr-code-modal {
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    border-radius: 16px;
-    padding: 2rem;
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: var(--shadow-xl);
-    border: 1px solid var(--card-border);
-    animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  
-  @keyframes modalAppear {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  
-  .close-modal-button {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
-    color: var(--text-color);
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .close-modal-button:hover {
-    background-color: var(--card-hover-border);
-    transform: scale(1.05);
+  :global(.qr-code-dialog) {
+    max-width: 360px;
   }
   
   .qr-code-container {
     text-align: center;
-  }
-  
-  .qr-code-container h3 {
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-    font-size: 1.5rem;
-    color: var(--text-color);
-  }
-  
-  .qr-code-container p {
-    color: var(--muted-color);
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
   }
   
   .qr-image-container {
@@ -877,26 +830,15 @@
     padding: 1rem;
     border-radius: 12px;
     display: inline-block;
-    margin-bottom: 1.5rem;
+    margin: 1.5rem 0;
     box-shadow: var(--shadow-md);
   }
   
   .qr-image-container img {
     display: block;
     max-width: 100%;
-    width: 256px;
-    height: 256px;
-  }
-  
-  .qr-code-actions {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .qr-code-actions :global(.btn) {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    width: 240px;
+    height: 240px;
   }
   
   :global(.social-label) {
@@ -904,56 +846,45 @@
   }
   
   .social-buttons {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
+    margin-top: 1rem;
   }
   
-  .social-button {
+  :global(.social-button) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    box-shadow: var(--shadow-sm);
   }
   
-  .social-button svg {
+  :global(.social-button svg) {
     flex-shrink: 0;
   }
   
-  .social-button.twitter {
-    background-color: #1DA1F2;
-    color: white;
+  :global(.social-button.twitter:hover) {
+    background-color: rgba(29, 161, 242, 0.1);
+    border-color: #1DA1F2;
+    color: #1DA1F2;
   }
   
-  .social-button.facebook {
-    background-color: #4267B2;
-    color: white;
+  :global(.social-button.facebook:hover) {
+    background-color: rgba(66, 103, 178, 0.1);
+    border-color: #4267B2;
+    color: #4267B2;
   }
   
-  .social-button.linkedin {
-    background-color: #0077B5;
-    color: white;
+  :global(.social-button.linkedin:hover) {
+    background-color: rgba(0, 119, 181, 0.1);
+    border-color: #0077B5;
+    color: #0077B5;
   }
   
-  .social-button.whatsapp {
-    background-color: #25D366;
-    color: white;
-  }
-  
-  .social-button:hover {
-    opacity: 0.95;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-  
-  .social-button:active {
-    transform: translateY(0);
+  :global(.social-button.whatsapp:hover) {
+    background-color: rgba(37, 211, 102, 0.1);
+    border-color: #25D366;
+    color: #25D366;
   }
   
   @media (min-width: 768px) {
@@ -980,16 +911,16 @@
       gap: 0.75rem;
     }
     
-    .social-button span {
+    :global(.social-button span) {
       display: none;
     }
     
-    .social-button {
+    :global(.social-button) {
       padding: 0.75rem;
       justify-content: center;
     }
     
-    .social-button svg {
+    :global(.social-button svg) {
       width: 20px;
       height: 20px;
     }

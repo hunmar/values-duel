@@ -106,6 +106,8 @@
     bind:this={drawerEl}
     class="drawer-overlay {overlayClassName}"
     on:click={handleClickOutside}
+    on:keydown={() => {}}
+    role="presentation"
     transition:fade={{ duration: 200 }}
   >
     <div

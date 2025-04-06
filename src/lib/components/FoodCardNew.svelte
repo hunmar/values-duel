@@ -1,5 +1,5 @@
 <script>
-  import { Card, CardHeader, CardContent } from '../ui';
+  import { Card, CardContent, Heading, Text } from '../ui';
   
   export let food = {};
   export let onClick = () => {};
@@ -43,8 +43,8 @@
     </div>
     
     <CardContent>
-      <h3>{food.name}</h3>
-      <p>{food.description}</p>
+      <Heading level={3} size="xl" className="food-name">{food.name}</Heading>
+      <Text size="sm" color="muted" className="food-description">{food.description}</Text>
     </CardContent>
   </Card>
 </div>
@@ -114,26 +114,18 @@
     transform: scale(1.08);
   }
   
-  h3 {
+  :global(.food-name) {
     margin: 0 0 10px 0;
-    font-size: 1.5rem;
     color: white;
-    font-weight: 600;
-    letter-spacing: -0.01em;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
   
-  p {
-    margin: 0;
-    font-size: 0.95rem;
-    color: var(--muted-color, #cbd5e1);
-    line-height: 1.5;
+  :global(.food-description) {
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    opacity: 0.95;
   }
   
   /* Focus styles for accessibility */
