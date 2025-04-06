@@ -5,7 +5,7 @@
   import foodItems from '../stores/foodItems.js';
   import { selectComparisonPair, updateRatings, sortItemsByRating } from '../utils/eloRating.js';
   import FoodCard from './FoodCard.svelte';
-  import { Progress, Badge } from '../ui';
+  import { Progress, Badge, Text, Heading, Container } from '../ui';
   
   // Data state
   let foodList = [];
@@ -279,10 +279,10 @@
   }
 </script>
 
-<div class="comparison-container">
+<Container size="xl" className="comparison-container">
   <header>
-    <h1>Which do you prefer?</h1>
-    <p>Click or tap on your choice</p>
+    <Heading level={1} size="2xl">Which do you prefer?</Heading>
+    <Text color="muted">Click or tap on your choice</Text>
   </header>
   
   <Progress 
@@ -347,25 +347,25 @@
           <span class="comparison-separator">/</span>
           <span class="total-comparisons">{currentState.totalComparisons}</span>
         </div>
-        <div class="comparison-label">Comparisons completed</div>
+        <Text size="sm" className="comparison-label">Comparisons completed</Text>
       {:else}
         <div class="loading-indicator">
           <span class="dot"></span>
           <span class="dot"></span>
           <span class="dot"></span>
         </div>
-        <div class="comparison-label">Loading comparisons...</div>
+        <Text size="sm" className="comparison-label">Loading comparisons...</Text>
       {/if}
     </div>
   </div>
   
   <!-- Live Ratings Leaderboard -->
   <div class="live-ratings-container">
-    <h2>Live Ratings</h2>
+    <Heading level={2} size="xl">Live Ratings</Heading>
     <div class="ratings-grid">
       {#each sortedFoodItems as food, index}
         <div class="rating-item" class:rating-updating={updatedRatings[food.id]}>
-          <div class="rating-rank">#{index + 1}</div>
+          <Badge variant="secondary" className="rating-rank">#{index + 1}</Badge>
           <div class="rating-image">
             <img 
               src={food.imageUrl} 
@@ -379,7 +379,7 @@
             />
           </div>
           <div class="rating-info">
-            <div class="rating-name">{food.name}</div>
+            <Text weight="semibold" className="rating-name">{food.name}</Text>
             <div class="rating-value" class:increasing={updatedRatings[food.id] && updatedRatings[food.id].newRating > updatedRatings[food.id].oldRating} class:decreasing={updatedRatings[food.id] && updatedRatings[food.id].newRating < updatedRatings[food.id].oldRating}>
               <span class="rating-number">{food.rating}</span>
               {#if updatedRatings[food.id]}
@@ -399,7 +399,7 @@
       {/each}
     </div>
   </div>
-</div>
+</Container>
 
 <style>
   .comparison-container {
