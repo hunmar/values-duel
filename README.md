@@ -101,17 +101,42 @@ npm run build
   - `App.svelte` - Main application component
   - `main.js` - Application entry point
 - `/docs` - Project documentation
+  - `/design` - Design system documentation
+    - `DESIGN_SYSTEM_PLAN.md` - Design system enhancement plan
+    - `DESIGN_SYSTEM_FOCUS.md` - Design system focus areas
+  - `/planning` - Project planning documents
+    - `IMPROVEMENT_PLAN.md` - Detailed improvement plan
+    - `EXECUTIVE_SUMMARY.md` - Project executive summary
+    - `CHECKPOINT.MD` - Project checkpoint documentation
+  - `/metrics` - Success metrics and measurements
+    - `SUCCESS_METRICS.md` - Project success metrics
   - `PROJECT_PROGRESS.md` - Detailed log of all work completed
   - `DESIGN_SYSTEM.md` - Comprehensive design system documentation
   - `CODE_QUALITY.md` - Documentation of code quality improvements
+  - `linting-issues.md` - Documentation of linting issues
+  - `linting-fixes-summary.md` - Summary of linting fixes
 
 ## Documentation
 
 For detailed information about the project, please refer to the following documentation:
 
-- [Project Progress](docs/PROJECT_PROGRESS.md) - A detailed log of all work completed, including initial state, enhancements, updates, and improvements
-- [Design System](docs/DESIGN_SYSTEM.md) - Comprehensive documentation of the design system, including colors, typography, spacing, and components
-- [Code Quality](docs/CODE_QUALITY.md) - Documentation of code quality improvements, including linting fixes, memory leak fixes, and recommendations
+### Design System
+- [Design System Overview](docs/DESIGN_SYSTEM.md) - Comprehensive documentation of the design system
+- [Design System Plan](docs/design/DESIGN_SYSTEM_PLAN.md) - Design system enhancement plan
+- [Design System Focus](docs/design/DESIGN_SYSTEM_FOCUS.md) - Design system focus areas
+
+### Project Planning
+- [Project Progress](docs/PROJECT_PROGRESS.md) - A detailed log of all work completed
+- [Improvement Plan](docs/planning/IMPROVEMENT_PLAN.md) - Detailed improvement plan
+- [Executive Summary](docs/planning/EXECUTIVE_SUMMARY.md) - Project executive summary
+
+### Code Quality
+- [Code Quality](docs/CODE_QUALITY.md) - Documentation of code quality improvements
+- [Linting Issues](docs/linting-issues.md) - Documentation of linting issues
+- [Linting Fixes Summary](docs/linting-fixes-summary.md) - Summary of linting fixes
+
+### Metrics
+- [Success Metrics](docs/metrics/SUCCESS_METRICS.md) - Project success metrics
 
 ## License
 

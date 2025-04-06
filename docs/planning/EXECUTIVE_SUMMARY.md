@@ -72,8 +72,8 @@ By implementing these improvements, Taste Duel will offer users a more engaging 
 
 The detailed implementation plans, success metrics, and technical specifications are available in the following documents:
 
-1. IMPROVEMENT_PLAN.md
-2. DESIGN_SYSTEM_PLAN.md
-3. SUCCESS_METRICS.md
+1. [IMPROVEMENT_PLAN.md](../planning/IMPROVEMENT_PLAN.md)
+2. [DESIGN_SYSTEM_PLAN.md](../design/DESIGN_SYSTEM_PLAN.md)
+3. [SUCCESS_METRICS.md](../metrics/SUCCESS_METRICS.md)
 
 This comprehensive approach will transform Taste Duel from a simple preference ranking tool into an educational platform that helps users understand their own taste preferences in a deeper, more meaningful way.
