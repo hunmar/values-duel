@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { fade, fly, slide, crossfade } from 'svelte/transition';
   import { quintOut, cubicInOut } from 'svelte/easing';
-  import { APP_STATES, THEMES, applyTheme } from './lib/stores/appState.js';
+  import { APP_STATES, THEMES, applyTheme, applyAccessibilityPreferences } from './lib/stores/appState.js';
   import appState from './lib/stores/appState.js';
   import foodItems from './lib/stores/foodItems.js';
   import { STORAGE_KEYS, loadFromLocalStorage, clearFromLocalStorage } from './lib/utils/localStorage.js';
@@ -10,11 +10,14 @@
   import ComparisonScreen from './lib/components/ComparisonScreen.svelte';
   import ResultsScreenNew from './lib/components/ResultsScreenNew.svelte';
   import AnalyticsScreen from './lib/components/AnalyticsScreen.svelte';
+  import SettingsPanel from './lib/components/SettingsPanel.svelte';
   
   let currentAppState = APP_STATES.LANDING;
   let previousAppState = null;
   let showHelp = false;
   let showConfetti = false;
+  let showSettings = false;
+  let appSettings = {};
   
   // Simple confetti animation for the results screen
   function createConfetti() {
@@ -114,8 +117,32 @@
         setTimeout(createConfetti, 800);
       }
       
-      // Always apply dark theme
-      applyTheme(THEMES.DARK);
+      // Update settings modal visibility
+      showSettings = state.showSettingsPanel || false;
+      
+      // Store app settings
+      appSettings = {
+        theme: state.theme || THEMES.DARK,
+        reducedMotion: state.reducedMotion,
+        highContrast: state.highContrast,
+        fontSize: state.fontSize,
+        kFactor: state.kFactor,
+        sound: state.sound,
+        soundVolume: state.soundVolume,
+        vibration: state.vibration
+      };
+      
+      // Apply theme and accessibility preferences
+      applyTheme(state.theme || THEMES.DARK);
+      
+      // Apply accessibility preferences if set
+      if (state.reducedMotion !== undefined || state.highContrast !== undefined || state.fontSize !== undefined) {
+        applyAccessibilityPreferences({
+          reducedMotion: state.reducedMotion,
+          highContrast: state.highContrast,
+          fontSize: state.fontSize
+        });
+      }
     });
     
     if (sharedResults) {
@@ -235,8 +262,17 @@
       }
     }
     
-    // Apply dark theme immediately
-    applyTheme(THEMES.DARK);
+    // Apply theme and accessibility settings immediately
+    applyTheme(savedAppState?.theme || THEMES.DARK);
+    
+    // Apply accessibility preferences if available
+    if (savedAppState) {
+      applyAccessibilityPreferences({
+        reducedMotion: savedAppState.reducedMotion,
+        highContrast: savedAppState.highContrast,
+        fontSize: savedAppState.fontSize
+      });
+    }
     
     // Return the unsubscribe function for cleanup - we're using the subscription from above
     return () => {};
@@ -295,19 +331,44 @@
 <div class="app-container">
   <div class="app-controls">
     <button 
+      class="control-button settings-button" 
+      on:click={() => showSettings = !showSettings}
+      aria-label="Show settings"
+      title="Settings"
+    >
+      <!-- Settings icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    </button>
+    
+    <button 
       class="control-button help-button" 
       on:click={() => showHelp = !showHelp}
       aria-label="Show help"
-      title="Show help"
+      title="Help"
     >
       <!-- Help icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
         <line x1="12" y1="17" x2="12.01" y2="17"></line>
       </svg>
     </button>
   </div>
+  
+  <!-- Settings Panel -->
+  <SettingsPanel 
+    bind:open={showSettings} 
+    on:close={() => {
+      showSettings = false;
+      appState.update(state => ({
+        ...state,
+        showSettingsPanel: false
+      }));
+    }}
+  />
   
   {#if showHelp}
     <div class="help-overlay" transition:fade={{ duration: 200 }}>
@@ -384,27 +445,33 @@
 
 <style>
   :global(:root) {
-    /* Dark theme variables - refined palette with better contrast */
+    /* CSS Variables for both themes - these will be overridden by theme-specific variables */
+    --primary-color: #10b981; /* Vibrant teal */
+    --primary-hover: #34d399; /* Lighter teal for hover */
+    --primary-focus: rgba(16, 185, 129, 0.5); /* For focus states */
+    
+    --secondary-color: #6366f1; /* Vibrant indigo */
+    --secondary-hover: #818cf8; /* Lighter indigo for hover */
+    --secondary-focus: rgba(99, 102, 241, 0.5); /* For focus states */
+    
+    --accent-color: #f43f5e; /* Vibrant rose */
+    --accent-hover: #fb7185; /* Lighter rose for hover */
+    
+    /* Font size variables for accessibility */
+    --font-size-small: 0.875rem;
+    --font-size-default: 1rem;
+    --font-size-large: 1.125rem;
+    --font-size-xlarge: 1.25rem;
+  }
+  
+  /* Dark theme (default) */
+  :global([data-theme="dark"]) {
     --bg-color: #0f172a; /* Deep blue-gray background */
     --text-color: #f8fafc; /* Very light gray-blue text for maximum contrast */
     --card-bg: #1e293b; /* Slightly lighter background for cards */
     --card-border: #334155; /* Subtle border for depth */
     --card-hover-border: #475569; /* Border on hover for better distinction */
     --card-selected-border: #10b981; /* Green teal border for selection */
-    
-    /* Primary action colors - Teal-based */
-    --primary-color: #10b981; /* Vibrant teal */
-    --primary-hover: #34d399; /* Lighter teal for hover */
-    --primary-focus: rgba(16, 185, 129, 0.5); /* For focus states */
-    
-    /* Secondary action colors - Indigo-based */
-    --secondary-color: #6366f1; /* Vibrant indigo */
-    --secondary-hover: #818cf8; /* Lighter indigo for hover */
-    --secondary-focus: rgba(99, 102, 241, 0.5); /* For focus states */
-    
-    /* Accent colors - Rose-based */
-    --accent-color: #f43f5e; /* Vibrant rose */
-    --accent-hover: #fb7185; /* Lighter rose for hover */
     
     /* Text and utility colors */
     --muted-color: #cbd5e1; /* Subtle text color with better contrast */
@@ -422,6 +489,79 @@
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Light theme */
+  :global([data-theme="light"]) {
+    --bg-color: #f8fafc; /* Light gray background */
+    --text-color: #0f172a; /* Dark text for contrast */
+    --card-bg: #ffffff; /* White card background */
+    --card-border: #e2e8f0; /* Light gray border */
+    --card-hover-border: #cbd5e1; /* Darker gray border on hover */
+    --card-selected-border: #10b981; /* Green teal border for selection */
+    
+    /* Text and utility colors */
+    --muted-color: #64748b; /* Medium gray for muted text */
+    --progress-bg: #e2e8f0; /* Light gray progress background */
+    --vs-color: #334155; /* Dark text for VS in comparison */
+    
+    /* Interactive elements */
+    --focus-ring: rgba(99, 102, 241, 0.4); /* Focus indicator */
+    --keyboard-hint-bg: #f1f5f9; /* Light background for keyboard hint */
+    --button-bg: rgba(99, 102, 241, 0.1); /* Very subtle button background */
+    --button-hover: rgba(99, 102, 241, 0.15); /* Hover state for buttons */
+    
+    /* Lighter shadows for light theme */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  /* High contrast mode */
+  :global(.high-contrast) {
+    --text-color: #ffffff !important;
+    --bg-color: #000000 !important;
+    --card-bg: #101010 !important;
+    --card-border: #444444 !important;
+    --card-hover-border: #666666 !important;
+    --muted-color: #eeeeee !important;
+    --vs-color: #ffffff !important;
+    --primary-color: #00ff9d !important;
+    --primary-hover: #00cc7a !important;
+    --secondary-color: #5e5eff !important;
+    --secondary-hover: #7a7aff !important;
+    --accent-color: #ff3355 !important;
+    --accent-hover: #ff667f !important;
+    --focus-ring: rgba(255, 255, 255, 0.8) !important;
+  }
+  
+  /* Font size settings */
+  :global([data-font-size="small"]) {
+    font-size: 0.875rem;
+  }
+  
+  :global([data-font-size="default"]) {
+    font-size: 1rem;
+  }
+  
+  :global([data-font-size="large"]) {
+    font-size: 1.125rem;
+  }
+  
+  :global([data-font-size="x-large"]) {
+    font-size: 1.25rem;
+  }
+  
+  /* Reduced motion settings */
+  :global(.reduced-motion) {
+    --transition-duration: 0ms !important;
+    --animation-duration: 0ms !important;
+  }
+  
+  :global(.reduced-motion *) {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
   }
   
   :global(body) {

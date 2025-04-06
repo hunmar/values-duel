@@ -161,9 +161,10 @@
     const winningItem = item.id === itemA.id ? itemA : itemB;
     const losingItem = item.id === itemA.id ? itemB : itemA;
     
-    // Calculate new ratings
+    // Calculate new ratings using custom K-factor from app state if available
     const actualOutcomeA = winningItem.id === itemA.id ? 1 : 0;
-    const ratings = updateRatings(itemA.rating, itemB.rating, actualOutcomeA);
+    const kFactor = currentState.kFactor || 32; // Use custom K-factor or default to 32
+    const ratings = updateRatings(itemA.rating, itemB.rating, actualOutcomeA, kFactor);
     
     // Store the updated ratings for immediate display and animation
     newRatingA = ratings.newRatingA;
