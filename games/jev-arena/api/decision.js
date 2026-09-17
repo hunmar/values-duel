@@ -1,10 +1,5 @@
 import { choice, noul, score, TypeSafeClient } from '@typesafe-ai/sdk';
 
-const client = new TypeSafeClient({
-  timeout: 2500,
-  retry: { maxRetries: 1 },
-});
-
 const POSTURES = {
   engage: 'Push toward the most useful enemy target and apply pressure while staying mobile.',
   guard: 'Stay close to the player, intercept nearby threats, and prioritize survival.',
@@ -76,6 +71,10 @@ export default async function handler(req, res) {
   );
   targetCriteria.none = 'Do not select an enemy when none is worth committing to right now.';
 
+  const client = new TypeSafeClient({
+    timeout: 2500,
+    retry: { maxRetries: 1 },
+  });
   const started = Date.now();
 
   try {
