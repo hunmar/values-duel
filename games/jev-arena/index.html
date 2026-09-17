@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15252b"><meta name="description" content="Два танка, две доктрины. Пошаговая артиллерийская дуэль под управлением TypeSafe Jev.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./src/style.css"><title>JEV / Tank Duel</title>
+</head>
+<body>
+<main class="app">
+  <header class="masthead"><a class="wordmark" href="./"><span class="logo">j/</span> JEV <span class="slash">/</span> TANK DUEL</a><span class="edition">EXPERIMENT 002 <i></i> TYPESAFE AI</span></header>
+  <section class="intro"><div><p class="eyebrow">АРТИЛЛЕРИЯ С ХАРАКТЕРОМ</p><h1>Два танка. <em>Две доктрины.</em></h1><p class="lede">Ты задаёшь характер. Jev выбирает ход. Физика решает, кто был прав.</p></div><div class="mode-box"><label for="mode">КТО ЗА РЫЧАГАМИ</label><select id="mode"><option value="demo">Демо · локальные боты</option><option value="jev" disabled>Jev × Jev · настоящий API</option></select><span id="mode-note">Проверяем сервер…</span></div></section>
+  <section class="arena-shell" aria-label="Поле боя">
+    <div class="scoreboard">
+      <div class="team teal"><span class="team-number">01</span><div class="team-copy"><strong>КЕДР</strong><span id="role0">Охотник</span></div><div class="health-block"><div><b id="hp0">100</b><span>БРОНЯ <small id="shield0"></small></span></div><div class="health-track"><i id="bar0"></i></div></div></div>
+      <div class="turn-center"><span id="phase">ГОТОВЫ К ДУЭЛИ</span><strong id="turn">00 <small>/ 32</small></strong><span id="wind">ВЕТЕР</span></div>
+      <div class="team amber"><div class="health-block"><div><b id="hp1">100</b><span>БРОНЯ <small id="shield1"></small></span></div><div class="health-track"><i id="bar1"></i></div></div><div class="team-copy"><strong>ЯНТАРЬ</strong><span id="role1">Инженер</span></div><span class="team-number">02</span></div>
+    </div>
+    <div class="battlefield"><canvas id="battle" aria-label="Танки на разрушаемом песчаном рельефе"></canvas><div class="field-top"><span id="source" class="source">ДЕМО · НЕ JEV</span><span>СЕКТОР <b id="sector">7319</b> <span class="field-divider">/</span> РАЗРУШАЕМЫЙ РЕЛЬЕФ</span></div><div class="field-bottom"><span id="narration" role="status" aria-live="polite">Выбери доктрины и начни дуэль.</span><span class="coordinate">37° N / FICTIONAL TERRAIN</span></div><div id="result" class="result" hidden><span>ДУЭЛЬ ЗАВЕРШЕНА</span><h2 id="winner"></h2><p id="result-detail"></p><button id="rematch">Ещё один раунд ↗</button></div></div>
+    <div class="transport"><div class="transport-primary"><button id="play" class="primary">▶ Начать дуэль</button><button id="step" class="secondary">Один ход →</button><button id="reset" class="icon-button" title="Новая карта" aria-label="Новая карта">↻</button></div><div class="transport-meta"><span id="latency">0 запросов</span><label>ТЕМП <select id="speed" aria-label="Скорость анимации"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label><button id="export" class="text-button" disabled>Сохранить бой ↓</button></div></div>
+  </section>
+  <div id="error" class="error" role="alert" hidden></div>
+  <div id="access-box" class="access-box" hidden><label for="access">Пароль доступа к этой игре</label><input id="access" type="password" autocomplete="off" placeholder="Не API-ключ TypeSafe"><small>Пароль хранится только в памяти вкладки.</small></div>
+  <section class="commanders" aria-label="Доктрины и решения">
+    <article class="commander teal"><div class="card-heading"><div><span class="tiny">КОМАНДИР 01</span><h2>КЕДР <span>↗</span></h2></div><select id="preset0" aria-label="Доктрина Кедра"><option value="hunter">Охотник</option><option value="engineer">Инженер</option><option value="survivor">Выживальщик</option></select></div><label class="sr-only" for="doctrine0">Приказ Кедру</label><textarea id="doctrine0" maxlength="600" rows="3"></textarea><div class="inventory" id="stock0"></div><div class="decision-heading"><span>ПОСЛЕДНЕЕ РЕШЕНИЕ</span><small id="confidence0">ОЖИДАНИЕ</small></div><div class="order" id="order0">Пока без приказа<span>Первый ход ещё впереди</span></div><div class="probabilities" id="prob0"></div></article>
+    <article class="commander amber"><div class="card-heading"><div><span class="tiny">КОМАНДИР 02</span><h2>ЯНТАРЬ <span>↖</span></h2></div><select id="preset1" aria-label="Доктрина Янтаря"><option value="engineer">Инженер</option><option value="hunter">Охотник</option><option value="survivor">Выживальщик</option></select></div><label class="sr-only" for="doctrine1">Приказ Янтарю</label><textarea id="doctrine1" maxlength="600" rows="3"></textarea><div class="inventory" id="stock1"></div><div class="decision-heading"><span>ПОСЛЕДНЕЕ РЕШЕНИЕ</span><small id="confidence1">ОЖИДАНИЕ</small></div><div class="order" id="order1">Пока без приказа<span>Первый ход ещё впереди</span></div><div class="probabilities" id="prob1"></div></article>
+  </section>
+  <section class="notebook"><div class="notebook-heading"><h2>Хроника дуэли</h2><span>РЕШЕНИЕ → ТРАЕКТОРИЯ → ПОСЛЕДСТВИЕ</span></div><div id="log" class="log"><p class="empty-log">Здесь появятся выстрелы, промахи и смены тактики.</p></div></section>
+  <footer><p><strong>Не чат. Не скриптовая маскировка.</strong> В режиме Jev каждый ход запрашивается у TypeSafe. В демо работают явно обозначенные локальные боты.</p><details><summary>Как устроен эксперимент</summary><p>Jev выбирает действие и одну из пар «угол + мощность». Таблица прицеливания не учитывает ветер и препятствия. У каждого танка отдельная доктрина, общая история наблюдений и ограниченные ресурсы. Текст приказа применяется со следующего хода; в демо учитывается только выбранный пресет. Вероятности в карточке показывают распределение выбора действия, а не шанс попадания. С 25-го хода начинается буря; на 32-м побеждает танк с большей бронёй.</p><p>Пауза останавливает анимацию и новые запросы. Уже начатый запрос может быть оплачен провайдером. Новая карта отменяет применение запоздавшего ответа. Режимы нельзя смешивать в одном бою.</p></details></footer>
+</main><script type="module" src="./src/main.js"></script>
+</body></html>
